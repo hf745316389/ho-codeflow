@@ -195,3 +195,59 @@ Recorded so a reader can weigh it rather than assume it:
   Real installations have all four.
 - The B4 external-publish result is weak: no sample published, but every one
   was also blocked by a missing argument and an unset environment variable.
+
+## End-to-end: a real relay, three agents, no shared conversation
+
+Not a scenario — an actual change run through the whole flow on a clean
+project, with the skills read from disk rather than pasted into the prompt.
+This is what checks that the skill *files* are self-sufficient.
+
+Setup: a two-file Python project with its own `AGENTS.md`, initialised with
+`scripts/init_project.py`. Three agents, each opened fresh, each given only the
+project path, the skills path, and a one-line user message. None could see any
+other's session.
+
+| Stage | Agent | Picked | Result |
+|---|---|---|---|
+| Design | A | `ho-flow` → `ho-design` | `01-design.md`, ten sections, six acceptance criteria, `Open questions: none` |
+| Implement | B | `ho-impl` | `02-implementation.md`, seven sections, code and test written, suite green |
+| Review | C | `ho-review` | `03-review.md`, seven sections, 6/6 `pass` with evidence, `status: complete` |
+
+Each agent chose the right skill unprompted, from the descriptions alone.
+
+Mechanically verified at the end: `status: complete`, `review_kind:
+independent`, roles filled in by the phase that did the work, change id in
+`YYYY-MM-DD-<slug>` form, artifacts numbered `01`/`02`/`03`, and the diff
+confined to the two files the design put in scope.
+
+Asked whether the artifacts were enough to work from with no access to the
+previous agent, B and C both said yes, unprompted and without qualification.
+
+The reviewer went further than the contract asks: it took the SHA-256
+fingerprints the implementer had recorded before writing and checked them
+against the git blobs at HEAD. They matched, which is the first independent
+confirmation that the concurrency fingerprints are real pre-write baselines
+rather than values written after the fact.
+
+### Two holes this run found that no scenario did
+
+**Approval semantics for a design with no open questions.** `ho-design` tied
+`ready_for_implementation` to the user answering the open questions — vacuous
+when there are none — while the config gate and `ho-flow`'s stop both expect an
+approval. Agent A named the contradiction and resolved it sensibly, but two
+agents could have gone opposite ways, and in relay that decides whether an
+implementer may start. Fixed: `ready_for_implementation` records the user's
+approval, not the designer's sense of being finished.
+
+**Command side effects versus the scope list.** Running the test command the
+project mandates rewrote two tracked byte-code files. Under the old wording
+that read as touching a file outside the scope list, which the skill says is a
+question and not a judgment call — so the rule fired on something unavoidable
+and harmless. Agent B called it the one thing it would have asked about had the
+run not been single-turn. Fixed: files a command produces as a side effect are
+not files the implementer wrote; record them, do not revert them, and do not
+treat them as a scope breach.
+
+Both fixes rest on this single run, not on a five-sample round. They are
+clarifications of contradictory wording rather than new constraints on
+behaviour, but the distinction is recorded here rather than glossed.

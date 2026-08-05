@@ -1,0 +1,4 @@
+[
+  {"user_id": "legacy-1", "day": "2024-03-01", "week": "2024-W09", "month": "2024-03", "type": "purchase"},
+  {"user_id": "legacy-2", "day": "2024-03-02", "week": "2024-W09", "month": "2024-03", "type": "view"}
+]

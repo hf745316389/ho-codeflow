@@ -36,7 +36,7 @@
 ## 30 秒上手
 
 ```bash
-git clone https://github.com/<you>/ho-codeflow
+git clone https://github.com/hf745316389/ho-codeflow
 python ho-codeflow/scripts/init_project.py /path/to/your/project
 ```
 

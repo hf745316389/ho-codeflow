@@ -73,9 +73,19 @@ do not coin one:
 `draft` · `ready_for_implementation` · `implementing` · `ready_for_review` ·
 `rework` · `complete` · `abandoned`
 
-This phase leaves `status: draft` while `Open questions` lists anything, and
-sets `ready_for_implementation` only after the user has answered every one of
-them. Blocked is not a status; it is `draft` with an open question.
+`ready_for_implementation` means the user has approved the design, not that you
+have finished writing it. This phase leaves `status: draft` and stops in both
+of these cases:
+
+- `Open questions` lists something. The user's answer is what moves it on, and
+  that answer is also the approval.
+- `Open questions` is `none`. The design is complete and still needs approving.
+  A design with nothing to ask about is not a design that approves itself.
+
+Only the user moves it to `ready_for_implementation` — or `ho-flow` does, when
+the user asked for `auto`, which is that approval given in advance.
+
+Blocked is not a status; it is `draft` with an open question.
 
 Also set: `id`, `slug`, `title`, `mode`, `round`, `roles`, `created_at`,
 `updated_at`.

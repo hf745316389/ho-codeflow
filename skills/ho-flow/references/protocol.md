@@ -41,9 +41,14 @@ rework                   -> implementing        (round += 1)
 any unfinished state     -> abandoned           (only when the user says so)
 ```
 
-`draft` holds while `01-design.md` has anything under `Open questions`. Only
-the user's answer moves it to `ready_for_implementation` — and that answer is
-also the approval to start implementing.
+`ready_for_implementation` records the user's approval, not the designer's
+sense of being finished. A design stays `draft` while `Open questions` lists
+anything, and also when it lists nothing: having no question left to ask is not
+the same as having been approved. The user moves it on — or `ho-flow` does when
+they asked for `auto`, which is that approval given in advance.
+
+Where an open question exists, the user's answer carries the approval too. They
+do not have to say yes twice.
 
 `review_kind` is `self` or `independent`, and it is set by whoever writes the
 review, on the basis of whether they also designed or implemented the change.

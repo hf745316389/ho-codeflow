@@ -42,8 +42,12 @@ rework                   -> implementing        （round += 1）
 任何未完成状态            -> abandoned           （仅在用户明确要求时）
 ```
 
-只要 `01-design.md` 的 `Open questions` 下还有内容，就停在 `draft`。只有用户的回答
-能推进到 `ready_for_implementation`——那个回答同时就是开始实现的批准。
+`ready_for_implementation` 记录的是用户的批准，不是设计者「我写完了」的感觉。只要
+`01-design.md` 的 `Open questions` 下还有内容，就停在 `draft`；那里什么都没有时，同样
+停在 `draft`——没有问题可问，不等于已经被批准。推进它的是用户，或者是 `ho-flow`（当
+用户要求了 `auto`，那就是预先给出的批准）。
+
+存在待答问题时，用户的回答同时就是批准。他们不需要说两次「可以」。
 
 `review_kind` 是 `self` 或 `independent`，由写验收报告的人根据自己是否也做了设计或
 实现来填。

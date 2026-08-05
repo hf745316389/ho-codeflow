@@ -83,7 +83,21 @@ Write `02-implementation.md` with these sections, in this order:
 6. **Unverified items and reasons** — what you could not check, and why
 7. **Remaining risks**
 
-Then set `status: ready_for_review`.
+## change.yaml
+
+`status` takes exactly one of these values. There is no other vocabulary —
+do not coin one:
+
+`draft` · `ready_for_implementation` · `implementing` · `ready_for_review` ·
+`rework` · `complete` · `abandoned`
+
+Set `ready_for_review` only when every task in the design is done and every
+acceptance criterion is met. If any task is unfinished or any criterion is
+unmet — including because you stopped to ask something — the status stays
+`implementing` and the question goes in `Deviations`. Blocked is not a status.
+
+A report that says "blocked" while `change.yaml` says `ready_for_review` tells
+the reviewer the work is finished. Only one of the two can be true.
 
 ## What this file is and is not
 

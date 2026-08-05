@@ -1,0 +1,16 @@
+# Optional host metadata. Hosts that do not read this file lose nothing:
+# SKILL.md is the whole skill.
+name: ho-flow
+description: >-
+  Set up a change and run it through design, implementation and review,
+  stopping where the user has to decide.
+when_to_use: >-
+  The user asks to run a change end to end, names solo or relay or auto, or
+  wants the work handed between agents or sessions.
+references:
+  - references/protocol.md
+  - references/config.md
+outputs:
+  - .ho/config.yaml
+  - .ho/protocol.md
+  - .ho/changes/<id>/

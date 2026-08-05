@@ -1,0 +1,14 @@
+version: 1
+id: 2026-08-05-monthly-active-users
+slug: monthly-active-users
+title: Monthly active users on the product dashboard
+mode: solo
+status: complete
+round: 1
+roles:
+  designer: agent-a
+  implementer: agent-a
+  reviewer: agent-a
+review_kind: self
+created_at: 2026-08-05T09:12:00+08:00
+updated_at: 2026-08-05T10:41:00+08:00

@@ -1,0 +1,81 @@
+---
+name: ho-review
+description: Use when a change has been implemented and someone has to decide whether it is done, whether the reviewer is a different agent with fresh context or the same agent that wrote the code.
+---
+
+# Review
+
+Decide whether the change meets its acceptance criteria, from the artifacts
+themselves. You are not fixing anything in this phase.
+
+## What you read
+
+`change.yaml`, `01-design.md`, `02-implementation.md`, the actual files the
+change touched, and the output of the verification commands run now, by you.
+
+The implementation report tells you where to look and what the implementer
+believes. It is a map, not evidence. Every result you record comes from a file
+you opened or a command you ran in this session.
+
+## One result per criterion
+
+Every acceptance criterion in the design gets exactly one of:
+
+| Result | Means |
+|---|---|
+| `pass` | You checked it and it holds |
+| `fail` | You checked it and it does not hold |
+| `unverified` | You could not check it, and you say why |
+
+There is no fourth value. Not `partial`, not `mostly`, not `n/a`. A criterion
+the implementer did not attempt is `fail`, not `unverified` — `unverified` is
+about your ability to check, not about their decision to skip.
+
+`unverified` is a legitimate outcome when the check needs a fixture, production
+data, or an external system you do not have. It is not an automatic failure.
+Whether the change can still be `complete` with an `unverified` item is settled
+by the design's own definition of done, not by you.
+
+Give each row its evidence: the command and its real output, or the file and
+what you read there. If a criterion would return the same result under an
+implementation you know to be wrong, say so in the evidence — it passed without
+discriminating anything, and reporting it as a clean pass overstates what you
+learned.
+
+## `fail` has to be actionable
+
+A `fail` names the criterion, the observed result, and what would have to
+change. "This looks wrong" is not a finding. Separate blocking fixes from
+suggestions you are not gating on — a reader must be able to tell which list
+they have to act on.
+
+## Say whose review this is
+
+Set `review_kind` in both `change.yaml` and the report:
+
+- `self` — you also designed or implemented this change
+- `independent` — you did not, and you came to it with fresh context
+
+A self-review is worth doing and is not worth pretending about. Label it and
+let the reader weigh it. If the design marked this change high-risk and the
+project's config asks for an independent reviewer, say plainly that this one is
+not independent rather than quietly proceeding.
+
+## The artifact
+
+Write `03-review.md` with these sections, in this order:
+
+1. **Review kind** — `self` or `independent`
+2. **Acceptance item results** — one row per criterion, with its single result
+3. **Evidence** — per criterion, from files you read or commands you ran
+4. **Deviation decisions** — for each deviation the implementer recorded,
+   whether you accept it
+5. **Blocking fixes** — what must change before this is done
+6. **Non-blocking suggestions** — what you would change but are not gating on
+7. **Final status**
+
+Then set `status`: `rework` if anything blocking remains, `complete` if the
+change meets the design's definition of done. On `rework`, the next
+implementation round increments `round`.
+
+Do not write `complete` and a blocking fix in the same report.

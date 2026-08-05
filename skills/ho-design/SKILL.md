@@ -10,9 +10,9 @@ conversation. You do not write business code in this phase.
 
 ## Locate the change
 
-Read the project's own rules first — `AGENTS.md`, `CLAUDE.md`, or whatever it
-uses — then `.ho/protocol.md` and `.ho/config.yaml` if they exist. Change
-artifacts live in `.ho/changes/<id>/`.
+Read the project's own rules first — `AGENTS.md`, or whatever equivalent
+instruction file your host reads — then `.ho/protocol.md` and `.ho/config.yaml`
+if they exist. Change artifacts live in `.ho/changes/<id>/`.
 
 If more than one change is open and the request names none of them, list the
 candidates and ask which. Do not pick one, and do not do all of them.

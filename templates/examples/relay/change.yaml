@@ -1,0 +1,14 @@
+version: 1
+id: 2026-01-18-monthly-active-users
+slug: monthly-active-users
+title: Monthly active users in the finance report
+mode: relay
+status: rework
+round: 1
+roles:
+  designer: agent-a
+  implementer: agent-b
+  reviewer: agent-c
+review_kind: independent
+created_at: 2026-01-18T10:00:00+08:00
+updated_at: 2026-01-18T16:20:00+08:00

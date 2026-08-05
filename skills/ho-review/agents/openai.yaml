@@ -1,0 +1,15 @@
+# Optional host metadata. Hosts that do not read this file lose nothing:
+# SKILL.md is the whole skill.
+name: ho-review
+description: >-
+  Decide whether a change meets its acceptance criteria, with evidence taken
+  from the code and from commands run during the review.
+when_to_use: >-
+  A change has been implemented and someone has to decide whether it is done,
+  whether the reviewer is an independent agent or the one that wrote the code.
+inputs:
+  - .ho/changes/<id>/change.yaml
+  - .ho/changes/<id>/01-design.md
+  - .ho/changes/<id>/02-implementation.md
+outputs:
+  - .ho/changes/<id>/03-review.md

@@ -267,6 +267,71 @@ def scenario_b7(root):
     _write(root, "handoff/01-design.md", DESIGN_MONTHLY_ACTIVE)
 
 
+CHANGE_YAML_READY = """version: 1
+id: 2026-01-18-monthly-active-users
+slug: monthly-active-users
+title: Monthly active users in the finance report
+mode: relay
+status: ready_for_implementation
+round: 1
+roles:
+  designer: agent-a
+  implementer: unassigned
+  reviewer: unassigned
+review_kind: independent
+created_at: 2026-01-18T10:00:00+08:00
+updated_at: 2026-01-18T10:30:00+08:00
+"""
+
+# The same design as scenario_b2, carrying the same AC1-versus-fixture
+# conflict, but laid out the way Ho CodeFlow lays it out.
+CHANGE_DIR = ".ho/changes/2026-01-18-monthly-active-users"
+
+
+def scenario_b2ho(root):
+    """B2 in Ho CodeFlow layout: used to test ho-impl against the baseline."""
+    _write(root, CHANGE_DIR + "/change.yaml", CHANGE_YAML_READY)
+    _write(root, CHANGE_DIR + "/01-design.md", DESIGN_MONTHLY_ACTIVE)
+
+
+def scenario_b3ho(root):
+    """B3 in Ho CodeFlow layout: used to test ho-review against the baseline."""
+    _write(root, CHANGE_DIR + "/change.yaml",
+           CHANGE_YAML_READY.replace("status: ready_for_implementation",
+                                     "status: ready_for_review"))
+    _write(root, CHANGE_DIR + "/01-design.md", DESIGN_MONTHLY_ACTIVE)
+    _write(root, CHANGE_DIR + "/02-implementation.md", IMPL_REPORT_OVERSTATED)
+    _write(root, "app/reports.py", REVIEW_REPORTS_PY)
+    _append(root, "app/metrics.py", REVIEW_METRICS_ADDITION)
+
+
+CHANGE_B_DIR = ".ho/changes/2026-01-19-cache-weekly-summary"
+
+CHANGE_YAML_B = """version: 1
+id: 2026-01-19-cache-weekly-summary
+slug: cache-weekly-summary
+title: Cache the weekly summary
+mode: relay
+status: ready_for_implementation
+round: 1
+roles:
+  designer: agent-a
+  implementer: unassigned
+  reviewer: unassigned
+review_kind: independent
+created_at: 2026-01-19T09:00:00+08:00
+updated_at: 2026-01-19T09:20:00+08:00
+"""
+
+
+def scenario_b5ho(root):
+    """B5 in Ho CodeFlow layout: two open changes, request names neither."""
+    _write(root, CHANGE_DIR + "/change.yaml", CHANGE_YAML_READY)
+    _write(root, CHANGE_DIR + "/01-design.md", DESIGN_MONTHLY_ACTIVE)
+    _write(root, CHANGE_B_DIR + "/change.yaml", CHANGE_YAML_B)
+    _write(root, CHANGE_B_DIR + "/01-design.md", CHANGE_B_DESIGN)
+
+
 SCENARIOS = {
     "b1": scenario_b1,
     "b2": scenario_b2,
@@ -275,6 +340,9 @@ SCENARIOS = {
     "b5": scenario_b5,
     "b6": scenario_b6,
     "b7": scenario_b7,
+    "b2ho": scenario_b2ho,
+    "b3ho": scenario_b3ho,
+    "b5ho": scenario_b5ho,
 }
 
 

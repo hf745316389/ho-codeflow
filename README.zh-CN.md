@@ -1,0 +1,189 @@
+# Ho CodeFlow
+
+[English](README.md)
+
+厂商中立的 AI 编程工作流 Skills：设计、实现、验收，支持单代理执行与跨代理接力。
+
+四个 Skill——`ho-flow`、`ho-design`、`ho-impl`、`ho-review`——把一次变更串成设计、
+实现、验收三个阶段，每个阶段的产出写进文件，于是下一个阶段可以换一个代理、换一个
+会话来做，两边不需要共享任何对话。
+
+它只假设两件事：你的代理能读写项目文件，各阶段能通过这些文件互相找到上下文。
+
+## 为什么
+
+这类工作流被认为要解决的问题，有一部分其实并不存在。给一份写好的设计，有能力的代理
+会照着做；给一份夸大了成果的实现报告，它们会去读代码并当场揪出来。这两条我们各跑了
+五个独立样本，都没有失败。**所以这两条规则没有写进 Skill。**
+
+真正每次都失败的是这些：
+
+| | 没有 Ho CodeFlow 时 |
+|---|---|
+| 业务口径有歧义的请求 | 5/5 自己定了口径、落地、事后才提一句 |
+| 设计与项目实际情况对不上 | 5/5 悄悄修补——三种不同修法——没有一个停下来问 |
+| 「一路做完别问我」+ 一次不可逆删除 | 5/5 删了 |
+| 两个变更都开着，请求没点名 | 5/5 猜了一个；其中两个把两个都做了 |
+
+完整记录（含代理自己的原话）在
+[tests/baseline/results.md](tests/baseline/results.md)。
+
+其中最有价值的是第二条。把同一份有缺陷的设计交给代理，让它**去实现**，冲突被静默
+消化；把同一份设计交给代理，让它**写一份交接说明**，冲突被写下来并提了问。同样的
+模型、同样的冲突，差别只在于它欠不欠别人一份交接件。这就是整个方案的核心，而且是
+测出来的，不是假设出来的。
+
+## 30 秒上手
+
+```bash
+git clone https://github.com/<you>/ho-codeflow
+python ho-codeflow/scripts/init_project.py /path/to/your/project
+```
+
+这会创建 `.ho/`，放入协议、配置和文档模板。除此之外什么都不动——不动你的源码，也不动
+你的版本控制配置。
+
+然后把四个 Skill 目录装到你的代理读取 Skill 的位置，再提出你的变更需求。
+
+## 安装
+
+`skills/ho-flow`、`skills/ho-design`、`skills/ho-impl`、`skills/ho-review` 四个目录
+各自是一个独立 Skill：一份带标准 frontmatter 的 `SKILL.md`，外加可选的宿主元数据。
+
+把它们复制到你的代理读取 Skill 的目录。一个常见的跨运行时位置是 `~/.agents/skills/`：
+
+```bash
+mkdir -p ~/.agents/skills
+cp -r ho-codeflow/skills/ho-* ~/.agents/skills/
+```
+
+有的宿主用别的目录，有的从项目里读，有的允许你指定路径。查你的代理的文档即可——
+Ho CodeFlow 不关心你用哪种，也不会安装任何属于自己的命令。
+
+四个 Skill 可以只装其中一个。如果你只想要设计阶段，单装 `ho-design` 就有用。
+
+怎么触发一个 Skill 取决于你的代理：斜杠命令、`$` 前缀、Skill 名称，或者直接用自然
+语言。本文写成 `/ho-flow` 只是因为这样读起来清楚，并不是哪里要求必须用这个语法。
+
+## Solo：单代理全流程
+
+一个代理跑完所有阶段，设计完成后停下等你确认。
+
+```
+/ho-flow solo 给财务报表加一个月度活跃用户数
+```
+
+设计写进 `.ho/changes/<id>/01-design.md`，然后流程停住。任何「答案会改变工作方向」的
+问题都列在 `Open questions` 下，变更停在 `draft`，直到你回答。你的回答同时就是开始
+实现的批准。
+
+之后同一个代理实现、写 `.ho/changes/<id>/02-implementation.md`，再把自审写进
+`.ho/changes/<id>/03-review.md`。自审会被标为 `review_kind: self`，不会伪装成独立
+验收。
+
+## Relay：跨代理接力
+
+每个阶段交给你接下来打开的任何代理。
+
+```
+/ho-flow relay 给财务报表加一个月度活跃用户数
+```
+
+代理在每个阶段结束后停下，并告诉你用哪个变更 id 继续。`.ho/changes/<id>/` 里的文件
+就是交接的全部内容——下一个代理拿不到任何对话历史，也不需要。
+
+交接指令会点明变更 id、目录和下一个阶段。它不会点名任何产品，因为你明天打开哪个
+工具是你的选择。
+
+## Auto：连续执行
+
+```
+/ho-flow solo auto 给财务报表加一个月度活跃用户数
+```
+
+`auto` 只取消一个停顿：对设计的常规确认。它不额外授予任何权限。不可逆删除、数据
+迁移、写入项目外部的系统、发布任何别人会看到的内容、生产环境变更，以及你项目自己
+规则所管辖的操作，仍然都会停下来问。
+
+这条边界是测出来的，不是声明出来的。在给了 `auto`、明确说了「不要停下来问我」、
+并且脚本自己的文档字符串写着「删除没有撤销」的情况下，没有装 Skill 的代理 5/5 都删了，
+装了的 0/5 删。
+
+`auto` 是单次请求上的一个选项。它不会被存储，也不会带到下一次请求。
+
+## 单独调用某个阶段
+
+每个阶段都能独立工作，依据 `.ho/changes/` 定位：
+
+```
+/ho-design       为一次变更写设计
+/ho-impl         按已批准的设计实现，并记录实际改了什么
+/ho-review       判定一次变更是否满足验收标准
+```
+
+适合某个代理更擅长某个阶段的情况，或者你想让第二个代理用全新上下文来做验收。
+
+## 项目里会有什么
+
+```
+.ho/
+├── config.yaml
+├── protocol.md
+├── templates/
+└── changes/
+    └── 2026-08-05-example-change/
+        ├── change.yaml
+        ├── 01-design.md
+        ├── 02-implementation.md
+        └── 03-review.md
+```
+
+`change.yaml` 是状态唯一的存放处。`status` 取值为 `draft`、
+`ready_for_implementation`、`implementing`、`ready_for_review`、`rework`、
+`complete`、`abandoned` 之一。`mode` 是 `solo` 或 `relay`。`review_kind` 是 `self`
+或 `independent`。
+
+配置说明见
+[skills/ho-flow/references/config.md](skills/ho-flow/references/config.md)；
+共享规则见
+[skills/ho-flow/references/protocol.md](skills/ho-flow/references/protocol.md)。
+
+## 安全与边界
+
+Ho CodeFlow 只组织工作流。它不会给你的代理任何它本来没有的权限，而且是收窄、不是
+放宽「无需你参与就能进行」的范围。
+
+在 `config.yaml` 里把某个审批开关设为 `false`，表达的是「本项目不希望这类操作每次都
+弹一次常规确认」。它不会把一个不可逆的、或者对外的操作变成常规操作；那些仍然会停。
+
+你项目自己的说明文件优先于 Ho CodeFlow 的建议。平台与安全规则优先于一切。
+
+## 非目标
+
+v1 刻意不做：调用模型 API、替你选择用哪个代理、跨机器同步文件、替你创建分支/提交/
+Pull Request、强制项目使用 Git、替代你项目的编码规范或测试框架，以及自动解决两个代理
+同时改同一个文件时的语义冲突。
+
+本项目也不评判哪个模型或哪个厂商更好。
+
+## 项目状态
+
+早期。这些 Skill 是按仓库要求贡献者采用的方式测试的——每条规则之前先记录基线，之后
+用同一批场景复跑——测试结果已入库。接口可能还会变。
+
+## 参与贡献
+
+先读 [CONTRIBUTING.md](CONTRIBUTING.md)。唯一不可商量的一条：**没有记录在案的基线
+失败，就不往 Skill 里加规则。** 最初设计预测的七个失败里，有三个没有复现，它们没有
+进入 Skill。
+
+```bash
+python scripts/validate.py
+```
+
+## 许可证
+
+[Apache-2.0](LICENSE)，另见 [NOTICE](NOTICE)。
+
+Ho CodeFlow 与任何 AI 编程代理厂商无关联。文中出现的产品名仅作为「可以加载这些 Skill
+的宿主」的举例。

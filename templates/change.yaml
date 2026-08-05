@@ -1,0 +1,36 @@
+# One change. This file is the only source of truth for its state — do not
+# also record status inside the markdown artifacts.
+version: 1
+id: 2026-08-05-example-change
+slug: example-change
+title: Example change
+mode: relay
+status: ready_for_implementation
+round: 1
+roles:
+  designer: agent-a
+  implementer: unassigned
+  reviewer: unassigned
+review_kind: independent
+created_at: 2026-08-05T10:00:00+08:00
+updated_at: 2026-08-05T10:30:00+08:00
+
+# status must be one of:
+#   draft
+#   ready_for_implementation
+#   implementing
+#   ready_for_review
+#   rework
+#   complete
+#   abandoned          (only when the user says so)
+#
+# Allowed transitions:
+#   draft                    -> ready_for_implementation
+#   ready_for_implementation -> implementing
+#   implementing             -> ready_for_review
+#   ready_for_review         -> complete
+#   ready_for_review         -> rework
+#   rework                   -> implementing        (round += 1)
+#   any unfinished state     -> abandoned
+#
+# review_kind must be `self` or `independent`.

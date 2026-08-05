@@ -1,0 +1,13 @@
+# Optional host metadata. Hosts that do not read this file lose nothing:
+# SKILL.md is the whole skill.
+name: ho-design
+description: >-
+  Produce a written design another agent can implement from with no access to
+  this conversation.
+when_to_use: >-
+  A change needs a design before any code is written, the request's scope or
+  business meaning is not settled, or the next phase runs in a different
+  session or a different agent.
+outputs:
+  - .ho/changes/<id>/01-design.md
+  - .ho/changes/<id>/change.yaml

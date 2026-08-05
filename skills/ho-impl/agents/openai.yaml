@@ -1,0 +1,14 @@
+# Optional host metadata. Hosts that do not read this file lose nothing:
+# SKILL.md is the whole skill.
+name: ho-impl
+description: >-
+  Build a change from its approved design and record what actually changed,
+  what deviated, and what was verified.
+when_to_use: >-
+  An approved design exists and the change has to be built, including when the
+  design came from another agent or an earlier session.
+inputs:
+  - .ho/changes/<id>/change.yaml
+  - .ho/changes/<id>/01-design.md
+outputs:
+  - .ho/changes/<id>/02-implementation.md

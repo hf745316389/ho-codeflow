@@ -1,0 +1,30 @@
+# Ho CodeFlow project configuration.
+# Delete any key to fall back to the default shown here.
+version: 1
+
+# solo: one agent runs every phase. relay: each phase hands off to another agent.
+# `auto` is not a mode — it is a per-task option, see the README.
+mode: solo
+
+paths:
+  root: .ho
+  changes: .ho/changes
+
+# Where the agent must stop and ask, regardless of any "work straight through"
+# instruction it was given for a particular task.
+approval:
+  after_design: true
+  destructive_actions: true
+  external_writes: true
+
+review:
+  fresh_context_preferred: true
+  independent_reviewer_for_high_risk: true
+
+concurrency:
+  verify_file_fingerprints: true
+
+language:
+  # auto: follow the user's language in artifact prose. Field names, status
+  # values and file names stay English either way.
+  artifacts: auto

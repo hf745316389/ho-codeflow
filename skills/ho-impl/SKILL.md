@@ -47,6 +47,13 @@ What does **not** require asking: anything the design left unspecified that you
 can settle without changing existing behaviour, an existing assertion, or the
 files-in-scope list. Do it, and record it under `Deviations`.
 
+Files a command produced as a side effect — byte-code caches, build output,
+coverage data, lockfiles a test runner rewrites — are not files you wrote. The
+scope list does not reach them, and running a command the project requires is
+not a scope breach. Note them under `Actual file changes` if they are tracked,
+say what produced them, and leave them as the command left them. Do not revert
+them to make the tree look clean.
+
 ## Stop and ask, always
 
 Irreversible deletion. Data migrations. Writes to systems outside this project.

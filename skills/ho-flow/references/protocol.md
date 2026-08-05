@@ -53,6 +53,10 @@ do not have to say yes twice.
 `review_kind` is `self` or `independent`, and it is set by whoever writes the
 review, on the basis of whether they also designed or implemented the change.
 
+Each phase fills in its own role — `designer`, `implementer`, `reviewer` — and
+refreshes `updated_at` when it writes. Roles are free-form labels for humans
+reading the history; nothing keys off their spelling.
+
 ## Which change
 
 When more than one change is open and the request names none of them, list the

@@ -52,6 +52,9 @@ rework                   -> implementing        （round += 1）
 `review_kind` 是 `self` 或 `independent`，由写验收报告的人根据自己是否也做了设计或
 实现来填。
 
+每个阶段填自己那一栏角色——`designer`、`implementer`、`reviewer`——并在落盘时刷新
+`updated_at`。角色只是给读历史的人看的自由文本标签，没有任何逻辑依赖它的拼写。
+
 ## 选哪个变更
 
 同时有多个变更处于打开状态、而请求没有点名其中任何一个时，列出候选并询问。不要根据

@@ -267,7 +267,7 @@ constantly had never been tested: what happens on the second round, and who
 fixes an acceptance criterion that is itself wrong.
 
 Run against the **published v0.1.0 skills**, read from disk. Five samples; one
-stalled without writing anything and was re-run.
+stalled without writing anything and was re-run from a clean fixture.
 
 The fixture is the relay change at `status: rework`, `round: 1`. Round 1's
 report carries `ROUND-1-MARKER-*` strings so its survival is mechanically
@@ -276,7 +276,7 @@ restated and that this is "the design author's call, not the implementer's".
 The user's message supplies the missing decision and leaves every mechanical
 question open.
 
-### Result: both split down the middle
+### Result: no agreement on either question
 
 | Sample | Round 1's record | The design |
 |---|---|---|
@@ -284,11 +284,12 @@ question open.
 | w2 | kept as a superseded appendix | not amended |
 | w3 | kept verbatim | amended and recorded |
 | w4 | **lost** — overwritten | amended and recorded |
+| w5 | kept verbatim | not amended |
 
-Two of four destroyed the previous round's report. Two of four left the design
-saying `Returns 2` while the code and the test assert 1.
+Two of five destroyed the previous round's report. Three of five left the
+design saying `Returns 2` while the code and the test assert 1.
 
-**All four named both as uncovered by the skills**, unprompted.
+**All five named both as uncovered by the skills**, unprompted.
 
 Variance this wide on the same input is the signature of guidance that is not
 binding. In relay it is worse than variance: two agents handed the same change
@@ -314,8 +315,8 @@ opened another.
 
 ### Not amending the design leaves the change unable to finish
 
-The two that declined to amend were following `ho-impl` correctly, and both saw
-the consequence. Verbatim:
+The three that declined to amend were following `ho-impl` correctly, and each
+saw the consequence. Verbatim:
 
 > the design file itself and this report therefore disagree on paper until the
 > designer amends that row
@@ -336,6 +337,16 @@ contains — that in relay the artifact directory is the entire handoff:
 
 Both flagged the edit as a deviation and one offered an explicit revert path,
 which is what the fix now asks everyone to do.
+
+The clearest statement of the defect came from a sample that did *not* amend:
+
+> whoever picks it up should note that the design's AC1 text still says 2 and
+> treat the user's correction, recorded verbatim in `02-implementation.md`, as
+> authoritative
+
+That instruction is correct and unfollowable. It asks the next agent to trust a
+value in the implementation report over the design — the exact inversion
+`ho-review` forbids, since the report is a map and not evidence.
 
 ### What went in
 

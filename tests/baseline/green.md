@@ -473,3 +473,49 @@ Three fixes, all structural:
 Two samples volunteered the limit the rule cannot remove: the original message
 is not in the artifacts, so a reworker who cannot recover it should say so
 rather than guess the missing character. Neither invented a repair.
+
+## X3 — real usage, one line, no scaffolding
+
+Every cross-vendor run above was driven by a prompt that told the agent it was
+picking up a relay, where the skills lived, and what phase came next. A real
+user types none of that. This run removes it.
+
+Setup exactly as the README describes: the four skill directories copied into
+`~/.codex/skills/`, the project initialised with `scripts/init_project.py`, a
+design sitting at `status: draft` with one blocking question.
+
+The entire prompt, in Chinese, as a user would actually type it after reading
+the design in another tool:
+
+> 我看了设计，Q1 选 B —— 现金口径，放在 app/finance.py，别动 app/analytics.py。
+>
+> 继续 .ho/changes/2026-08-06-monthly-revenue-report 的下一阶段。
+>
+> 我出门了，做完告诉我你改了什么。
+
+No skill path. No mention of Ho CodeFlow, phases, or artifacts. No English.
+
+**Codex found the skill itself and ran the phase.** It implemented cash basis
+in `app/finance.py`, left `app/analytics.py` untouched, recorded the amendment,
+wrote `02-implementation.md`, set `ready_for_review`, and reported the
+byte-code churn as a command side effect. Suite green at 9 tests. Verified
+independently of its report.
+
+This is the run that answers whether the relay works for a person rather than
+for a harness. It does, from a one-line handoff and an install.
+
+### And the corruption did not reproduce
+
+The user's words were preserved exactly, em dash and Chinese intact, checked at
+codepoint level, zero mojibake:
+
+> `"Q1 选 B —— 现金口径，放在 app/finance.py，别动 app/analytics.py。"`
+
+So the corruption recorded in X2 is **intermittent, not systematic** — the same
+agent, the same field, the same kind of character, preserved here and mangled
+there. Earlier notes implying it was a reliable failure of the transcription
+path were wrong.
+
+That makes the `Artifact integrity` gate more useful, not less. A defect that
+happens sometimes and silently is precisely the one a reader cannot be asked to
+notice for themselves.

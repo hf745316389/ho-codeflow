@@ -17,6 +17,19 @@ The implementation report tells you where to look and what the implementer
 believes. It is a map, not evidence. Every result you record comes from a file
 you opened or a command you ran in this session.
 
+## More than one round
+
+`02-implementation.md` carries the current round first and earlier rounds below
+under `## Round N (superseded)`. Read the current round for what to check, and
+the earlier ones for what was already accepted or left unverified.
+
+If an earlier round is missing — replaced rather than kept — say so. You are
+reviewing round N without the record of round N-1, and that limits what you can
+conclude about deviations carried forward.
+
+If `01-design.md` has an `Amendments` section, check that each amendment
+matches what the user actually said and does not quietly widen scope.
+
 ## One result per criterion
 
 Every acceptance criterion in the design gets exactly one of:
@@ -60,6 +73,14 @@ A self-review is worth doing and is not worth pretending about. Label it and
 let the reader weigh it. If the design marked this change high-risk and the
 project's config asks for an independent reviewer, say plainly that this one is
 not independent rather than quietly proceeding.
+
+## Configuration
+
+`.ho/config.yaml` governs one thing here. When
+`review.independent_reviewer_for_high_risk` is true and the design marks the
+change high-risk, a self-review does not satisfy the project. Say that plainly
+in the report and leave the change for an independent reviewer, rather than
+recording `complete` on your own authority.
 
 ## The artifact
 

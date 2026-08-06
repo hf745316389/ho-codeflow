@@ -64,3 +64,17 @@ unrecorded judgment call.
 What could go wrong, and what the implementer must stop and ask about rather
 than decide: irreversible deletion, migrations, writes to external systems,
 publishing, production changes, and anything this project's own rules gate.
+
+## Amendments
+
+Empty on round 1.
+
+When a review finds a criterion, task, or scope boundary is itself wrong and
+the user settles it, record the change here rather than editing the section
+above silently.
+
+| Round | Date | What changed | The user's words |
+|---|---|---|---|
+| | | | |
+
+Only what the user's answer settles. Nothing else in the design moves.

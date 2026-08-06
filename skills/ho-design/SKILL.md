@@ -61,6 +61,8 @@ Write `01-design.md` with these sections, in this order:
 8. **Ordered tasks** — small enough to check off
 9. **Acceptance criteria** — the table below
 10. **Risks and approval boundaries** — what must not proceed without asking
+11. **Amendments** — empty on round 1; later rounds record what the user
+    changed, when, and in whose words
 
 Then update `change.yaml` and stop. Do not start implementing because the
 design "turned out simple".
@@ -92,6 +94,15 @@ Also set: `id`, `slug`, `title`, `mode`, `round`, `roles`, `created_at`,
 
 `id` is `YYYY-MM-DD-<slug>`, and the change directory is named after it:
 `.ho/changes/2026-08-05-monthly-active-users/`. Not a counter, not a bare slug.
+
+## Configuration
+
+`approval.after_design: false` in `.ho/config.yaml` is the project saying it
+does not want a routine pause here — treat it as approval given in advance,
+exactly as `auto` does. It waives nothing in `Risks and approval boundaries`.
+
+`language.artifacts` controls the prose language of the artifact. Field names,
+status values and file names stay English whatever it says.
 
 ## Acceptance criteria
 

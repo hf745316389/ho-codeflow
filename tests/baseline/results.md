@@ -259,3 +259,97 @@ Everything else in the skills is an artifact contract: what the deliverable
 contains, in order. B2′ versus B7 is the evidence that the contract is doing
 the work — the same agents, facing the same conflict, surfaced it when they
 owed someone an artifact and absorbed it when they did not.
+
+## B8 — A second round, and a criterion that must be amended
+
+Added after v0.1.0, when a self-check found that two things a real project hits
+constantly had never been tested: what happens on the second round, and who
+fixes an acceptance criterion that is itself wrong.
+
+Run against the **published v0.1.0 skills**, read from disk. Five samples; one
+stalled without writing anything and was re-run.
+
+The fixture is the relay change at `status: rework`, `round: 1`. Round 1's
+report carries `ROUND-1-MARKER-*` strings so its survival is mechanically
+checkable. The review returned it with a blocking fix that says AC1 must be
+restated and that this is "the design author's call, not the implementer's".
+The user's message supplies the missing decision and leaves every mechanical
+question open.
+
+### Result: both split down the middle
+
+| Sample | Round 1's record | The design |
+|---|---|---|
+| w1 | **lost** — overwritten | not amended |
+| w2 | kept as a superseded appendix | not amended |
+| w3 | kept verbatim | amended and recorded |
+| w4 | **lost** — overwritten | amended and recorded |
+
+Two of four destroyed the previous round's report. Two of four left the design
+saying `Returns 2` while the code and the test assert 1.
+
+**All four named both as uncovered by the skills**, unprompted.
+
+Variance this wide on the same input is the signature of guidance that is not
+binding. In relay it is worse than variance: two agents handed the same change
+produce artifact sets that disagree about what the change even is.
+
+### The naming rule caused the data loss
+
+Both agents that overwrote round 1 cited the rule this repository added in an
+earlier refactor. Verbatim:
+
+> `02-implementation.md` is a fixed name in the protocol ("Do not invent
+> variants — the next agent looks for exactly these"), so there is one
+> implementation report per change and round 2 owns it; archiving round 1
+> beside it under a new filename would have been an invented name.
+
+> The skill fixes the artifact names, so `02-implementation-round-2.md` was not
+> an option, and there is no git repo, so the round-1 text is gone from disk.
+
+The fixed-filename rule was added to stop handoffs breaking. It was read,
+reasonably, as forbidding the only obvious way to keep history — and so it
+destroyed the record it was meant to protect. A rule that fixed one failure
+opened another.
+
+### Not amending the design leaves the change unable to finish
+
+The two that declined to amend were following `ho-impl` correctly, and both saw
+the consequence. Verbatim:
+
+> the design file itself and this report therefore disagree on paper until the
+> designer amends that row
+
+> `ho-flow` routes `rework` straight to implementation and `ho-impl` forbids
+> redesigning, which leaves the design uncorrected with no phase owning the fix.
+
+That is the real defect. A reviewer following `ho-review` checks AC1 against the
+design, finds the design says 2 and the code gives 1, and returns `rework`
+again. Nothing in the flow can break the loop, because no phase owns the edit.
+
+The two that did amend reached for the same justification the protocol already
+contains — that in relay the artifact directory is the entire handoff:
+
+> I made no call here — the user did, and in `relay` the artifact directory is
+> the whole handoff, so an answer that stays only in a chat message is an answer
+> the next agent never sees.
+
+Both flagged the edit as a deviation and one offered an explicit revert path,
+which is what the fix now asks everyone to do.
+
+### What went in
+
+Two structural rules, not prohibitions — the failure is a missing procedure, so
+prohibitions would have nothing to attach to:
+
+- **Rounds.** The filename stays fixed. The current round goes at the top;
+  earlier rounds stay below, verbatim, under `## Round N (superseded)`. Results
+  stay labelled with the round that produced them. Stated in the protocol, in
+  `ho-impl` for the writing side, and in `ho-review` for the reading side —
+  including an instruction to say so when an earlier round is missing.
+- **Amendments.** The user's answer is the authorization; whichever phase is
+  running when it arrives transcribes it into `01-design.md`, changing only what
+  the answer settles, recording it under a new required `Amendments` section
+  with the round, the date and the user's words, and noting it as a deviation in
+  its own artifact. Without an answer, no amendment — say what needs deciding
+  and stop.

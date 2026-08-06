@@ -192,29 +192,18 @@ Nor does this project evaluate which model or vendor is better.
 Real things that will bite on a real project. Listed here rather than
 discovered by you.
 
-**A second round overwrites the first one's record.** When a review returns
-`rework`, `round` increments and the implementer writes `02-implementation.md`
-again — and nothing says where. The likely outcome is that round 1's
-deviations, unverified items and evidence are overwritten, which is exactly
-what the next reviewer needs in order to judge what changed. `03-review.md` has
-the same problem. The rework loop has never been run end to end.
-
-**No procedure for amending an approved design.** A review can legitimately
-conclude that an acceptance criterion is wrong — the worked example in
-`templates/examples/relay/` ends in exactly that finding. Nothing says who may
-edit an approved design, or how the edit is recorded. Left as is, the
-implementer either edits it themselves, which is the failure `ho-impl` exists
-to prevent, or the change stalls.
-
-**`config.yaml` is mostly decorative.** Ten of its eleven fields are read by no
-skill. Setting `approval.destructive_actions: false` changes nothing;
-`paths.root` claims the directory is configurable while `.ho/` is hardcoded
-throughout. Only `mode` is honoured. Treat the file as documentation of intent
-until this is wired up.
+**`config.yaml` was decorative until v0.1.1.** Ten of its eleven fields were
+read by no skill. They are wired up now, but only `mode`,
+`concurrency.verify_file_fingerprints` and the two `review.*` keys have been
+seen in use; the rest are documented intent.
 
 **Nothing has been tested at scale.** Every run in `tests/` is against a
 four-file project. How the design phase behaves when "read the files in scope"
 means a thousand files is unmeasured.
+
+**`paths.root` still does not move anything.** The key is documented and the
+skills now read the config, but `.ho/` is written literally in several places.
+Changing it will not work yet.
 
 **No guidance on `.ho/` and version control.** Whether to commit the change
 directory, and what happens when two people open changes on different branches

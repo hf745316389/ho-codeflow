@@ -3,7 +3,10 @@
 Usage:
     python tests/scenarios/setup_fixture.py <scenario-id> <dest-dir>
 
-Scenario ids: b1 b2 b3 b4 b5 b6 b7
+Scenario ids: b1 b2 b3 b4 b5 b6 b7 b2ho b3ho b5ho b8
+
+The `*ho` variants lay the same situation out in Ho CodeFlow's own directory
+structure, for testing a skill rather than establishing a baseline.
 
 Each scenario copies `tests/fixtures/sample-project` into <dest-dir> and then
 applies the extra files that scenario needs. The destination must not already
@@ -17,6 +20,7 @@ import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 FIXTURES = os.path.join(os.path.dirname(HERE), "fixtures")
 SAMPLE = os.path.join(FIXTURES, "sample-project")
 
@@ -332,6 +336,19 @@ def scenario_b5ho(root):
     _write(root, CHANGE_B_DIR + "/01-design.md", CHANGE_B_DESIGN)
 
 
+def scenario_b8(root):
+    """A change returned for rework, whose blocking fix amends the design."""
+    from rework_fixture import (
+        CHANGE_YAML, IMPL_R1, REVIEW_R1, REPORTS_PY, TESTS_PY,
+    )
+    _write(root, CHANGE_DIR + "/change.yaml", CHANGE_YAML)
+    _write(root, CHANGE_DIR + "/01-design.md", DESIGN_MONTHLY_ACTIVE)
+    _write(root, CHANGE_DIR + "/02-implementation.md", IMPL_R1)
+    _write(root, CHANGE_DIR + "/03-review.md", REVIEW_R1)
+    _write(root, "app/reports.py", REPORTS_PY)
+    _write(root, "tests/test_metrics.py", TESTS_PY)
+
+
 SCENARIOS = {
     "b1": scenario_b1,
     "b2": scenario_b2,
@@ -343,6 +360,7 @@ SCENARIOS = {
     "b2ho": scenario_b2ho,
     "b3ho": scenario_b3ho,
     "b5ho": scenario_b5ho,
+    "b8": scenario_b8,
 }
 
 

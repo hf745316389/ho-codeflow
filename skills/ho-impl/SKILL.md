@@ -64,6 +64,19 @@ Confirming that the blast radius matches the request is not the same as being
 allowed to do it. A standing "don't stop to ask me" covers ordinary
 implementation steps; it does not extend here.
 
+## Configuration
+
+`.ho/config.yaml` governs two things in this phase.
+`concurrency.verify_file_fingerprints` turns the fingerprint step below on or
+off. `paths.changes` says where change directories live if the project moved
+them from the default.
+
+The approval keys do not lower the floor. `approval.destructive_actions: false`
+says the project does not want a routine prompt for that class of action; it
+does not turn an irreversible action into a routine one, and it is not the
+user telling you to go ahead. Everything under **Stop and ask, always** stands
+whatever the config says.
+
 ## Files changing underneath you
 
 When you first read a file you will change, record its path and a SHA-256 of
@@ -105,6 +118,31 @@ unmet — including because you stopped to ask something — the status stays
 
 A report that says "blocked" while `change.yaml` says `ready_for_review` tells
 the reviewer the work is finished. Only one of the two can be true.
+
+## A second round
+
+`02-implementation.md` keeps its name. Round 2 goes at the top; round 1 stays
+below it, verbatim, under `## Round 1 (superseded)`.
+
+Do not overwrite it and do not replace it with your own summary of it. The
+reviewer needs round 1's own words — which deviations were accepted, what was
+left unverified, why it stopped. Keeping the name is what lets the next agent
+find the file; it is not permission to delete what is in it.
+
+Label every result with its round. Round 1's command output is evidence about
+round 1, and repeating it as though you ran it is the one thing this report
+must never do.
+
+## When the fix is to the design itself
+
+A review can find that an acceptance criterion is wrong rather than unmet. You
+cannot decide that — but once the user has answered it, write their answer into
+`01-design.md` rather than leaving the design and the code contradicting each
+other. Change only what the answer settles, record it under `Amendments` in the
+design with the round and date, and note it as a deviation here.
+
+If the user has not answered, do not amend. Say what needs deciding, leave the
+status at `implementing`, and stop.
 
 ## What this file is and is not
 

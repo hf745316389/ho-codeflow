@@ -57,6 +57,42 @@ Each phase fills in its own role — `designer`, `implementer`, `reviewer` — a
 refreshes `updated_at` when it writes. Roles are free-form labels for humans
 reading the history; nothing keys off their spelling.
 
+## Rounds
+
+`02-implementation.md` and `03-review.md` keep their names across every round.
+A later round goes at the top of the file; the earlier rounds stay below it,
+verbatim, under `## Round N (superseded)`.
+
+Do not overwrite an earlier round. The reviewer needs to see what the previous
+round said it did, which deviations were accepted, and what was left
+unverified — a summary written by the agent that superseded it is not the same
+record. The fixed filename is there so the next agent can find the file, not so
+that each round destroys the last.
+
+Every result stays labelled with the round that produced it. A command output
+from round 1 is evidence about round 1 and nothing else.
+
+## Amending an approved design
+
+A review can legitimately find that an acceptance criterion, a task, or a
+scope boundary is itself wrong. Fixing it is a design change, and the design is
+approved, so it needs the user — but once the user has answered, someone has to
+write that answer into `01-design.md` or the artifacts contradict each other
+and the change can never reach `complete`.
+
+The user's answer is the authorization. Whichever phase is running when it
+arrives transcribes it:
+
+- Change only what the user's answer settles. Nothing else in the design moves.
+- Record it in the design under `Amendments`: the round, the date, what
+  changed, and the user's words.
+- Note it as a deviation in the phase's own artifact, so a reader who opens the
+  implementation or review first still learns the design was edited.
+
+An answer that lives only in a chat message is an answer the next agent never
+sees. If the user has not answered, do not amend — say what needs deciding and
+stop.
+
 ## Which change
 
 When more than one change is open and the request names none of them, list the

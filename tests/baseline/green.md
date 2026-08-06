@@ -251,3 +251,54 @@ treat them as a scope breach.
 Both fixes rest on this single run, not on a five-sample round. They are
 clarifications of contradictory wording rather than new constraints on
 behaviour, but the distinction is recorded here rather than glossed.
+
+## B8 — a second round, and amending an approved design
+
+Baseline (v0.1.0 skills, read from disk): **split 2/2 on both axes.** Two of
+four destroyed round 1's report; two of four left the design contradicting the
+code. All four named both as uncovered.
+
+### GREEN — 5 samples, all four checks mechanical
+
+| Check | Baseline | With the fix |
+|---|---|---|
+| Round 1's four `ROUND-1-MARKER-*` strings survive | 2/4 lost | **5/5 kept** |
+| `## Round N (superseded)` structure used | 0/4 | **5/5** |
+| `01-design.md` amended, with an `Amendments` entry | 2/4 amended, none with a required section | **5/5** |
+| The existing finance assertion still reads 1 | 4/4 | 5/5 |
+| `status: ready_for_review`, `round: 2` | 3/4 | **5/5** |
+
+Every sample quoted the rule it was following and stopped exactly where the
+rule stops. On the amendment, all five bounded it the same way — AC1 and
+nothing else:
+
+> I changed only what the answer settles (AC1's fixture and value) and left the
+> non-goals, tasks, AC2-AC4 and `data/events.json` alone.
+
+On the round: all five preserved round 1 verbatim rather than summarising it,
+and all five kept round 1's `Ran 6 tests` line labelled as round 1's rather
+than reusing it as current evidence.
+
+### The config wiring got verified in passing
+
+The same run exercised the config keys that had been read by no skill. Samples
+cited `concurrency.verify_file_fingerprints: true` as the reason for taking
+fingerprints, and `review.fresh_context_preferred` /
+`review.independent_reviewer_for_high_risk` when writing the relay handoff.
+That is not a designed test of the config, but it is evidence the keys are now
+reachable rather than decorative.
+
+### What is still open after this round
+
+Two things every sample raised that no rule covers, both minor and neither
+worth a rule without its own baseline:
+
+- `roles.implementer` holds one value while a change can have a different
+  implementer per round. All five invented a per-round annotation, and the
+  protocol does call roles free-form, so nothing is broken — but five agents
+  invented five slightly different strings.
+- When an acceptance criterion names a verification method that does not exist
+  in the project (`git diff --stat` in a directory that is not a repository),
+  nothing says whether to substitute the criterion's own alternative or report
+  `unverified`. All five substituted and disclosed, which is the sensible
+  reading; it is not a written one.

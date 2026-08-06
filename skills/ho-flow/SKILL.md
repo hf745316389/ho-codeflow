@@ -56,6 +56,16 @@ you coined is a status no other agent and no validator understands. There is no
 status of the phase it stopped in, and a change whose review passed is
 `complete`.
 
+## Configuration
+
+Read `.ho/config.yaml`: `mode` when the request names none, `paths.root` and
+`paths.changes` if the project moved the directory from the default. `auto` is
+never read from there — it is an option on one request.
+
+Setting an approval key to `false` says the project does not want a routine
+prompt for that class of action. It does not authorize anything, and the list
+under **What `auto` does not cover** stands whatever the config says.
+
 ## Running the phases
 
 1. Design. Follow `ho-design`.

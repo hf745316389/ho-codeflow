@@ -39,6 +39,18 @@ be wrong, say so here. It passed without discriminating anything.
 One row per deviation the implementer recorded. If the artifacts show a
 deviation they did not record, add it here and say it was undeclared.
 
+## Artifact integrity
+
+The state of the artifacts themselves, separately from the code.
+
+Is the text the design records as the user's words intact — well-formed, not
+truncated, not paraphrased? Damage there blocks, even when every criterion
+passes: it is the only evidence the decision was the user's.
+
+Anything else you noticed — a stale cross-reference, two sections that
+contradict each other, a claim in the implementation report that turned out
+wrong — belongs here as a finding and does not block on its own.
+
 ## Blocking fixes
 
 What must change before this is done. Each one names the criterion, the

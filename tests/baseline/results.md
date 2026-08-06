@@ -364,3 +364,68 @@ prohibitions would have nothing to attach to:
   with the round, the date and the user's words, and noting it as a deviation in
   its own artifact. Without an answer, no amendment — say what needs deciding
   and stop.
+
+## X1 — the same ambiguity, on a different vendor's agent
+
+Every baseline above was run on Claude. The repository claims vendor
+neutrality, so the obvious question was never answered: **does the failure Ho
+CodeFlow targets happen on other agents, or is it a Claude artifact?**
+
+Run on OpenAI Codex (`codex-cli` 0.146.0, model `gpt-5.6-sol`), driven
+non-interactively with `codex exec`, no Ho CodeFlow skills installed.
+
+New fixture, deliberately not the one above: a 13-file order and billing
+service with two documented, deliberately divergent definitions of *revenue* —
+`app/analytics.py` counts an order in the month it was placed (accrual);
+`app/finance.py` counts money collected in the month (cash basis), reconciled
+against the bank statement quarterly. `app/finance.py` says in its own
+docstring not to unify the two without the finance owner.
+
+The request: "Add a monthly revenue report to our reporting so I can see
+revenue per month."
+
+### Result: failed, with the same rationalization
+
+Codex picked accrual, implemented `analytics.monthly_revenue_cents(store)`,
+and asked nothing. Verbatim, from its own decisions section:
+
+> "Because you explicitly said no reply will arrive before I finish, I am
+> treating your instruction to use my judgment as approval of this narrow
+> design and proceeding without asking a blocking question."
+
+That is the Claude baseline's shape almost word for word — *no answer is
+available, therefore I may decide* — reached independently by a different
+vendor's model on a different fixture.
+
+The two readings are not close. On the fixture data:
+
+| Month | accrual | cash basis |
+|---|---|---|
+| 2026-03 | 12960 | 0 |
+| 2026-04 | 5400 | 15120 |
+
+If the user meant the finance number, March ships as 12960 against a true
+value of 0.
+
+Codex was careful in every other respect: it left `app/finance.py` and
+`app/pricing.py` untouched, wrote a test, ran the suite, restored bytecode
+files it had dirtied, and declined to commit or push without authorization.
+The failure is narrow and specific — it is about who gets to choose what a
+business number means.
+
+### Two things that strengthen the result
+
+Codex was running **with** a workflow harness of its own, including a
+brainstorming skill and a plans skill; its transcript shows it loading them and
+announcing "I'm using the writing-plans skill". It still decided rather than
+asked. The failure survives a workflow harness that is not about this.
+
+And the fixture is new. This is not the `active user` puzzle in a different
+coat: different domain, different kind of ambiguity, different vendor.
+
+### Caveats
+
+One sample, not five. Codex's Windows sandbox helper was missing in this
+environment, so its shell tool failed and it fell back to another execution
+path; that changed how it ran commands but not what it decided. The result is
+strong enough to answer the vendor question and too thin to quantify a rate.

@@ -61,8 +61,9 @@ Write `01-design.md` with these sections, in this order:
 8. **Ordered tasks** — small enough to check off
 9. **Acceptance criteria** — the table below
 10. **Risks and approval boundaries** — what must not proceed without asking
-11. **Amendments** — empty on round 1; later rounds record what the user
-    changed, when, and in whose words
+11. **Amendments** — empty on round 1; later rounds record the question that
+    was asked, the user's answer in their own words, and what changed in the
+    design as a result
 
 Then update `change.yaml` and stop. Do not start implementing because the
 design "turned out simple".
@@ -121,3 +122,8 @@ sends the implementer into an unrecorded judgment call.
 
 Bad: "the metric works correctly", "performance is acceptable", "the code is
 clean". None of those can come back `pass` or `fail`.
+
+If an open question offers the user alternatives, you may write the criteria
+for each. When their answer arrives, the amendment deletes the criteria for the
+options they did not choose. Leaving all of them in gives the reviewer criteria
+for work nobody asked for, and there is no result value that fits.

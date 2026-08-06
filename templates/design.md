@@ -73,8 +73,15 @@ When a review finds a criterion, task, or scope boundary is itself wrong and
 the user settles it, record the change here rather than editing the section
 above silently.
 
-| Round | Date | What changed | The user's words |
-|---|---|---|---|
-| | | | |
+| Round | Date | The question asked | The user's answer, their words | What changed in the design |
+|---|---|---|---|---|
+| | | | | |
 
 Only what the user's answer settles. Nothing else in the design moves.
+
+Record the question, not just the answer. A reviewer who sees only an answer
+cannot tell what it was answering, and the question is usually gone from
+`Open questions` by then.
+
+If the question offered alternatives, delete the acceptance criteria for the
+options the user did not choose.

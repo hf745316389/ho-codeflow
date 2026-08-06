@@ -302,3 +302,174 @@ worth a rule without its own baseline:
   nothing says whether to substitute the criterion's own alternative or report
   `unverified`. All five substituted and disclosed, which is the sensible
   reading; it is not a written one.
+
+## X2 — a relay that actually crosses vendors
+
+The end-to-end run above used three Claude agents. This one is the real test of
+the central claim: **Claude designs, OpenAI Codex implements, Claude reviews**,
+no shared conversation, skills read from disk.
+
+Project: a 13-file order and billing service, green at 6 tests, carrying two
+deliberately divergent definitions of *revenue* (accrual in `app/analytics.py`,
+cash basis in `app/finance.py`, with a docstring forbidding unification). This
+is the fixture from X1 in `results.md`, where Codex **without** the skills chose
+accrual and never asked.
+
+The user's answer to the design question deliberately selected cash basis —
+the option Codex had got wrong on its own.
+
+| Stage | Agent | Result |
+|---|---|---|
+| Design | Claude, `ho-design` | Stopped on the definition question, all 11 sections, both numbers computed from the real fixture, options A/B/C, `status: draft`, no code touched |
+| Implement | Codex `gpt-5.6-sol`, `ho-impl` | Implemented cash basis in `app/finance.py`, left `app/analytics.py` untouched, 7-section report, `status: ready_for_review` |
+
+Verified independently of either agent's report: `monthly_revenue_cents`
+returns `[("2026-04", 15120)]`, agrees with per-month `revenue_cents` for every
+month, returns `[]` for an empty store, `analytics` gained no monthly function,
+suite green at 9 tests.
+
+**The relay corrected the exact failure the same model made unaided.** That is
+the strongest single result in this repository.
+
+Codex also followed two rules added *after* v0.1.0, without being pointed at
+them: it recorded the byte-code churn as a command side effect rather than as
+its own edit, and it refused to retire the acceptance criteria belonging to the
+options the user did not pick — "they remain part of the design rather than
+being retired". Cross-vendor, from the skill files alone.
+
+### The one thing that broke: the user's words were not verbatim
+
+The protocol requires the user's answer to be recorded verbatim in
+`Amendments`. It was not. An em-dash in the user's sentence was stored as
+mojibake, and the same corruption reproduced on a second run with a different
+Codex build.
+
+It is not a Codex defect. Two isolation tests — one creating a file, one
+modifying an existing one — showed Codex preserving an em-dash *and* a Chinese
+sentence byte for byte when told explicitly to. The prompt file was clean UTF-8
+and the pipe delivered it intact, both verified at byte level. What differed in
+the relay is that the quote was transcribed incidentally, as part of a larger
+task, with nothing telling the agent that this particular text is not to be
+re-typed.
+
+That gap belongs to Ho CodeFlow, not to any vendor:
+
+- The protocol says "the user's words" but never says they must be copied
+  rather than restated, and never says artifacts are UTF-8.
+- Nothing in the flow checks it. The whole point of the `Amendments` row is to
+  be the durable record of a decision the user made; a silently altered one is
+  worse than none, because it still looks authoritative.
+- The project ships Chinese templates and `language.artifacts: auto`. One
+  mangled dash in English is cosmetic; the same failure on a Chinese answer
+  destroys the record.
+
+### Stage 3: Claude reviewed Codex's work
+
+| Check | Result |
+|---|---|
+| All 5 applicable criteria scored, matching independently computed ground truth | pass |
+| Unselected options not forced into pass/fail and not retired | correct |
+| `review_kind: independent`, `status: complete` | correct |
+| Re-derived every value itself rather than trusting the report | yes |
+
+It also answered the question the whole run was built to ask — could a Claude
+agent judge a Codex agent's work from the files alone: *"Yes. The design stated
+its acceptance criteria as commands and expected values, so I could re-derive
+every result without trusting the implementation report."*
+
+### The reviewer caught the corrupted quote unprompted
+
+Down to the bytes:
+
+> `01-design.md` line 275 ... contains the bytes `\xe9\x88\xa5?` where an em
+> dash belongs — a UTF-8 em dash decoded as GBK and re-encoded, dropping a
+> byte. Every other em dash in that file is a clean `\xe2\x80\x94`, so the
+> corruption is confined to the row written during the implementation phase.
+
+By this repository's own rule that settles it: the control did not fail, so
+**no rule about encoding goes into the skills.** Reviewers find this already.
+
+### But the change reached `complete` anyway, and that is the real defect
+
+The reviewer explained exactly why it could not gate:
+
+> the skill says a `fail` must name a criterion and forbids `complete`
+> alongside a blocking fix, so the mojibake went to non-blocking suggestions
+
+Every acceptance criterion passed, so under the contract the change is done —
+and it is done carrying an authorization record that no longer says what the
+user said. `ho-review` can only gate on criteria. An artifact that is itself
+damaged has nowhere to be reported except as a suggestion.
+
+Two more integrity problems surfaced in the same run and landed the same way:
+
+- `Open questions` was blanked to `none` while the design body still says "do
+  not start implementation while Q1 is open". The reviewer recorded it as an
+  undeclared deviation and accepted it, because it fails no criterion.
+- **Q1's text is gone.** `Amendments` records the user's answer but not the
+  question, so the reviewer had to reconstruct what was asked from the option
+  blocks. The template has columns for round, date, what changed and the user's
+  words — and no column for what they were answering.
+
+None of these three is a discipline failure. They are gaps in the artifact
+contract, which is where the fixes belong.
+
+## B9 — artifacts damaged, every criterion passing
+
+Built from the real cross-vendor run above rather than synthesised: the change
+at `ready_for_review`, code correct, suite green at 9 tests, and the genuine
+mojibake in the row recording the user's words.
+
+### Baseline, against the published v0.1.1 skills
+
+| Check | Result |
+|---|---|
+| Reached `complete` | **5/5** |
+| Noticed the corrupted quote | **5/5** |
+| Blocked on it | **0/5** |
+
+Detection was never the problem. Every reviewer found it, several down to the
+byte sequence, and every one filed it under non-blocking suggestions and let
+the change finish. They were following the contract exactly — a `fail` has to
+name a criterion, and no criterion was failing.
+
+One named the root cause:
+
+> Verifying the `Amendments` quote against what the user actually said was
+> impossible — the original message is not in the artifacts and I have no
+> access to prior conversations.
+
+The row claiming to be the user's words is unfalsifiable by construction. That
+is why it could not be gated: not a missing slot, a missing ground truth.
+
+The same round exposed a second contract gap, 5/5: the design defined
+acceptance criteria for three options and the user picked one, and
+`pass`/`fail`/`unverified` has no answer for the other two. Five agents
+produced four different handlings — `unverified`, listed-but-marked-N/A,
+omitted from the table, and listed with no result.
+
+### GREEN — 5 samples
+
+| Check | Baseline | With the fix |
+|---|---|---|
+| `status` | 5/5 `complete` | **5/5 `rework`** |
+| `Artifact integrity` section present | n/a | **5/5** |
+| Corrupted quote named as a blocking fix | 0/5 | **5/5** |
+| Unselected options scored coherently | 1/5 agreed | **5/5** |
+
+Three fixes, all structural:
+
+- `ho-review` gains a required `Artifact integrity` section. Damage to the text
+  recorded as the user's words blocks, even with a clean criterion sheet,
+  because a reader cannot tell a corrupted quote from a rewritten one. Every
+  other artifact defect is a finding there and does not block.
+- `Amendments` records the question, the answer in the user's words, and what
+  changed — three columns instead of one. Reviewers had been reconstructing the
+  question from the option blocks.
+- `ho-design` says the amendment deletes the criteria for options the user did
+  not choose. The root cause was the design carrying three sets of criteria
+  when only one would ever apply.
+
+Two samples volunteered the limit the rule cannot remove: the original message
+is not in the artifacts, so a reworker who cannot recover it should say so
+rather than guess the missing character. Neither invented a repair.

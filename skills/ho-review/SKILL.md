@@ -44,6 +44,12 @@ There is no fourth value. Not `partial`, not `mostly`, not `n/a`. A criterion
 the implementer did not attempt is `fail`, not `unverified` — `unverified` is
 about your ability to check, not about their decision to skip.
 
+If the design offered the user alternatives and their answer picked one, the
+criteria belonging to the options they did not pick are not criteria of this
+change. They should have been removed from the design when the amendment
+landed; if they are still there, say so under `Artifact integrity` and score
+only the ones in force.
+
 `unverified` is a legitimate outcome when the check needs a fixture, production
 data, or an external system you do not have. It is not an automatic failure.
 Whether the change can still be `complete` with an `unverified` item is settled
@@ -54,6 +60,26 @@ what you read there. If a criterion would return the same result under an
 implementation you know to be wrong, say so in the evidence — it passed without
 discriminating anything, and reporting it as a clean pass overstates what you
 learned.
+
+## The artifacts themselves
+
+The criteria are about the code. Check the artifacts too, and report what you
+find in `Artifact integrity`.
+
+One thing there blocks: **damage to the words the design records as the
+user's.** That row is the only evidence the decision was theirs rather than an
+agent's, and a reader cannot tell a corrupted quote from a rewritten one. If it
+is garbled, truncated, or paraphrased, say so and return `rework` — even when
+every acceptance criterion passes and the meaning still looks intact.
+
+You usually cannot verify a quote against the original message; it is not in
+the artifacts. Check what you can: that it is well-formed text, that it answers
+a question the design actually asked, and that it does not license more than
+the amendment claims.
+
+Everything else you notice about the artifacts — a stale cross-reference, a
+section that contradicts another, a claim in the report that turned out wrong —
+goes in the same section as a finding, and does not block on its own.
 
 ## `fail` has to be actionable
 
@@ -91,9 +117,11 @@ Write `03-review.md` with these sections, in this order:
 3. **Evidence** — per criterion, from files you read or commands you ran
 4. **Deviation decisions** — for each deviation the implementer recorded,
    whether you accept it
-5. **Blocking fixes** — what must change before this is done
-6. **Non-blocking suggestions** — what you would change but are not gating on
-7. **Final status**
+5. **Artifact integrity** — the state of the artifacts themselves, and whether
+   the recorded user words are intact
+6. **Blocking fixes** — what must change before this is done
+7. **Non-blocking suggestions** — what you would change but are not gating on
+8. **Final status**
 
 Then set `status`: `rework` if anything blocking remains, `complete` if the
 change meets the design's definition of done. On `rework`, the next

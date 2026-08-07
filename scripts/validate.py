@@ -236,20 +236,24 @@ def check_readmes(report):
     drift is which statuses, modes, artifacts and skills exist, because a
     reader of one README should not learn a different product from the other.
     """
-    en = os.path.join(REPO, "README.md")
-    zh = os.path.join(REPO, "README.zh-CN.md")
-    if not report.check(os.path.isfile(en), "missing README.md"):
+    # README.md is the one GitHub renders on the repository page, and it holds
+    # the Chinese text; the English rendering lives beside it under its own
+    # language tag. Which language is default is a positioning decision, not a
+    # structural one — this check only cares that the two stay in step.
+    default = os.path.join(REPO, "README.md")
+    english = os.path.join(REPO, "README.en.md")
+    if not report.check(os.path.isfile(default), "missing README.md"):
         return
-    if not report.check(os.path.isfile(zh), "missing README.zh-CN.md"):
+    if not report.check(os.path.isfile(english), "missing README.en.md"):
         return
 
-    en_text, zh_text = read(en), read(zh)
+    default_text, english_text = read(default), read(english)
     for token in list(STATUSES) + list(MODES) + list(ARTIFACTS) + list(SKILLS):
-        in_en, in_zh = token in en_text, token in zh_text
+        in_default, in_english = token in default_text, token in english_text
         # Plain ASCII: this message has to survive a Windows console codepage.
-        report.check(in_en == in_zh,
+        report.check(in_default == in_english,
                      "%r appears in %s but not the other README; the two must stay in step"
-                     % (token, "README.md" if in_en else "README.zh-CN.md"))
+                     % (token, "README.md" if in_default else "README.en.md"))
 
 
 def check_templates(report):

@@ -53,7 +53,7 @@ python scripts/validate.py
 
 It must pass on Windows and on at least one Unix-like environment. Both
 READMEs have to stay in step: protocol states, config fields, and command
-examples appear in `README.md` and `README.zh-CN.md`, and a change to one
+examples appear in `README.md` and `README.en.md`, and a change to one
 without the other is a bug.
 
 ## Scope

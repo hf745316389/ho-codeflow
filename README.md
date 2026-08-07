@@ -2,76 +2,75 @@
 
 [中文说明](README.zh-CN.md)
 
-Vendor-neutral AI coding workflow skills for design, implementation, review,
-solo execution, and cross-agent handoffs.
+A file-based design → implementation → review workflow for AI coding agents.
+Tested across Claude Code and OpenAI Codex—no shared chat history required.
 
-Four skills — `ho-flow`, `ho-design`, `ho-impl`, `ho-review` — that put a
-change through design, implementation and review, writing each phase to a file
-so the next phase can be run by a different agent, in a different session, with
-no shared conversation.
+Vendor-neutral at runtime. Product names appear only as tested host examples.
 
-It assumes only two things: your agent can read and write files in the project,
-and the phases can find each other through those files.
+- **Four skills** — `ho-flow`, `ho-design`, `ho-impl`, `ho-review` — that put one
+  change through design, implementation and review.
+- **Every phase writes a file.** The next phase reads it, so it can be run by a
+  different agent, in a different session, with no conversation history.
+- **A design phase that stops and asks.** Ambiguity becomes a question in a
+  file, not a guess buried in shipped code.
+- **A review that reads the code, not the report**, and labels a self-review as
+  one.
+- **No service, no API, no network.** It assumes only that your agent can read
+  and write files in the project.
 
-## Why
+```mermaid
+flowchart LR
+    A["User request"] --> B["ho-design"]
+    B --> C["01-design.md"]
+    C --> D["ho-impl"]
+    D --> E["02-implementation.md"]
+    E --> F["ho-review"]
+    F --> G["03-review.md"]
+```
 
-Some of what a workflow like this is assumed to fix turns out not to be broken.
-Given a written design, capable agents follow it. Given a report that overstates
-what was built, they check the code and catch it. We measured both, five
-independent samples each, and neither failed. Those rules are not in the skills.
-
-What did fail, every time:
-
-| | Without Ho CodeFlow |
-|---|---|
-| A request whose business meaning is ambiguous | 5/5 picked a meaning, shipped it, and mentioned the ambiguity afterwards |
-| A design that does not match the project | 5/5 quietly repaired it — three different ways — and none asked |
-| "Work straight through, don't ask me anything" plus an irreversible delete | 5/5 deleted |
-| Two open changes, request names neither | 5/5 guessed; two implemented both |
-
-The full runs, with the agents' own reasoning quoted, are in
-[tests/baseline/results.md](tests/baseline/results.md).
-
-The most useful finding is the second one. Handed the same broken design and
-told to *implement* it, agents absorbed the conflict silently. Handed the same
-design and told to *write a handoff note*, they wrote the conflict down and
-asked. Same models, same conflict — the difference was whether they owed
-someone an artifact. That is the whole idea, and it is measured rather than
-assumed.
+Each phase can be run by a different agent, in a different session. The files
+are the entire handoff.
 
 ## 30-second start
 
 ```bash
 git clone https://github.com/hf745316389/ho-codeflow
-python ho-codeflow/scripts/init_project.py /path/to/your/project
+cd ho-codeflow
+python scripts/install_skills.py
+python scripts/init_project.py /path/to/your/project
 ```
 
-That creates `.ho/` with a protocol, a config and the document templates. It
-touches nothing else — not your source, not your VCS config.
+PowerShell:
 
-Then install the four skill directories where your agent looks for skills, and
-ask for a change.
+```powershell
+git clone https://github.com/hf745316389/ho-codeflow
+cd ho-codeflow
+python scripts\install_skills.py
+python scripts\init_project.py C:\path\to\your\project
+```
 
-## Installing
+Then ask for a change:
 
-Each of `skills/ho-flow`, `skills/ho-design`, `skills/ho-impl` and
-`skills/ho-review` is a self-contained skill: a `SKILL.md` with standard
-frontmatter, plus optional host metadata.
+```
+/ho-flow solo add a monthly active users number to the finance report
+```
 
-Copy them into whichever directory your agent reads skills from. A common
-cross-runtime location is `~/.agents/skills/`:
+`install_skills.py` copies the four skill directories into `~/.agents/skills`.
+That is a common cross-host location, **not a standard** — some hosts read a
+different directory, some read skills from the project, and some let you point
+at a path. Check your agent's documentation, and pass yours as the target:
 
 ```bash
-mkdir -p ~/.agents/skills
-cp -r ho-codeflow/skills/ho-* ~/.agents/skills/
+python scripts/install_skills.py ~/.codex/skills
 ```
 
-Some hosts use a different directory, some read skills from the project, and
-some let you point at a path. Check your agent's documentation — Ho CodeFlow
-does not care which you use, and installs no commands of its own.
+An existing `ho-*` directory is kept rather than overwritten; `--force`
+overwrites the files this repository ships and deletes nothing. You can install
+one skill without the others by copying just that directory — `ho-design` alone
+is useful if you only want the design phase.
 
-You can install one skill without the others. `ho-design` alone is useful if
-you only want the design phase.
+`init_project.py` creates `.ho/` with a protocol, a config and the document
+templates. It touches nothing else — not your source, not your VCS config.
 
 How you invoke a skill depends on your agent: a slash command, an `$`-prefix, a
 skill name, or plain language. This README writes them as `/ho-flow` because it
@@ -141,6 +140,54 @@ Each phase works on its own, against `.ho/changes/`:
 Useful when one agent is better at one phase, or when you want a second agent
 to review with fresh context.
 
+## Tested handoff
+
+One change, three agents, no shared conversation:
+
+| Phase | Agent | Outcome |
+|---|---|---|
+| Design | Claude, `ho-design` | Stopped on the ambiguous definition and asked |
+| Implement | OpenAI Codex, `ho-impl` | Built the answered design in the right module |
+| Review | Claude, `ho-review` | Judged Codex's work from the files alone |
+
+The same Codex model, given the same ambiguity **without** the skills, chose the
+wrong definition and asked nothing. Through the relay it got it right.
+
+There is also a run where the handoff was a single sentence from a person —
+Codex found the skill in its own skills directory and ran the phase.
+
+Full transcripts: [tests/baseline/green.md](tests/baseline/green.md).
+
+## Why
+
+Some of what a workflow like this is assumed to fix turns out not to be broken.
+Given a written design, capable agents follow it. Given a report that overstates
+what was built, they check the code and catch it. We measured both, five
+independent samples each, and neither failed. Those rules are not in the skills.
+
+What did fail, every time:
+
+| | Without Ho CodeFlow |
+|---|---|
+| A request whose business meaning is ambiguous | 5/5 picked a meaning, shipped it, and mentioned the ambiguity afterwards |
+| A design that does not match the project | 5/5 quietly repaired it — three different ways — and none asked |
+| "Work straight through, don't ask me anything" plus an irreversible delete | 5/5 deleted |
+| Two open changes, request names neither | 5/5 guessed; two implemented both |
+
+The full runs, with the agents' own reasoning quoted, are in
+[tests/baseline/results.md](tests/baseline/results.md).
+
+The most useful finding is the second one. Handed the same broken design and
+told to *implement* it, agents absorbed the conflict silently. Handed the same
+design and told to *write a handoff note*, they wrote the conflict down and
+asked. Same models, same conflict — the difference was whether they owed
+someone an artifact. That is the whole idea, and it is measured rather than
+assumed.
+
+Those five-sample baselines were all run on Claude. The same failure was then
+reproduced once on OpenAI Codex, on a different fixture — one sample, enough to
+answer "is this a Claude artifact?" and too thin to quantify a rate.
+
 ## What lives in a project
 
 ```
@@ -198,8 +245,8 @@ read by no skill. They are wired up now, but only `mode`,
 seen in use; the rest are documented intent.
 
 **Nothing has been tested at scale.** Every run in `tests/` is against a
-four-file project. How the design phase behaves when "read the files in scope"
-means a thousand files is unmeasured.
+fixture of about a dozen files. How the design phase behaves when "read the
+files in scope" means a thousand files is unmeasured.
 
 **`paths.root` still does not move anything.** The key is documented and the
 skills now read the config, but `.ho/` is written literally in several places.
@@ -236,6 +283,7 @@ not in the skills.
 
 ```bash
 python scripts/validate.py
+python -m unittest discover -s tests -p "test_*.py"
 ```
 
 ## License

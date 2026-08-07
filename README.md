@@ -222,8 +222,8 @@ them — a recorded baseline before each rule, and the same scenarios re-run
 after — and the results are checked in, including the runs that found nothing.
 
 One number to read carefully: `scripts/validate.py` reports over a thousand
-checks, but about 87% of those are one regex per line of markdown. The distinct
-assertions number in the low hundreds.
+checks, but roughly nine in ten are one regex per line of markdown. The
+distinct assertions number in the low hundreds.
 
 Interfaces may change.
 

@@ -1,26 +1,21 @@
 # Ho CodeFlow
 
-[中文说明](README.zh-CN.md)
+[English](README.en.md)
 
-A file-based design → implementation → review workflow for AI coding agents.
-Tested across Claude Code and OpenAI Codex—no shared chat history required.
+面向 AI 编程智能体的文件化设计、实现和验收工作流。已完成 Claude Code 与 OpenAI
+Codex 跨工具接力测试，不需要共享聊天记录。
 
-Vendor-neutral at runtime. Product names appear only as tested host examples.
+运行时保持厂商中立，产品名称只作为经过测试的宿主示例出现。
 
-- **Four skills** — `ho-flow`, `ho-design`, `ho-impl`, `ho-review` — that put one
-  change through design, implementation and review.
-- **Every phase writes a file.** The next phase reads it, so it can be run by a
-  different agent, in a different session, with no conversation history.
-- **A design phase that stops and asks.** Ambiguity becomes a question in a
-  file, not a guess buried in shipped code.
-- **A review that reads the code, not the report**, and labels a self-review as
-  one.
-- **No service, no API, no network.** It assumes only that your agent can read
-  and write files in the project.
+- **四个 Skill**——`ho-flow`、`ho-design`、`ho-impl`、`ho-review`，把一次改动走完设计、实现、验收三步。
+- **每一步都写成文件。** 下一步读文件就够了，所以可以换一个 AI、换一个会话接着干，不用把之前的对话复述一遍。
+- **设计阶段会停下来问你。** 有歧义的地方变成文件里的一个问题，而不是藏在已经写完的代码里的一个猜测。
+- **验收看代码，不看报告**，自审会被明确标成自审。
+- **没有服务、没有 API、不联网。** 只要求你的 AI 能读写项目文件。
 
 ```mermaid
 flowchart LR
-    A["User request"] --> B["ho-design"]
+    A["用户需求"] --> B["ho-design"]
     B --> C["01-design.md"]
     C --> D["ho-impl"]
     D --> E["02-implementation.md"]
@@ -28,167 +23,157 @@ flowchart LR
     F --> G["03-review.md"]
 ```
 
-Each phase can be run by a different agent, in a different session. The files
-are the entire handoff.
+每一步都可以由不同的 AI、在不同的会话里执行。文件就是全部交接内容。
 
-## 30-second start
+## 30 秒上手
 
 ```bash
 git clone https://github.com/hf745316389/ho-codeflow
 cd ho-codeflow
 python scripts/install_skills.py
-python scripts/init_project.py /path/to/your/project
+python scripts/init_project.py /你的项目
 ```
 
-PowerShell:
+PowerShell：
 
 ```powershell
 git clone https://github.com/hf745316389/ho-codeflow
 cd ho-codeflow
 python scripts\install_skills.py
-python scripts\init_project.py C:\path\to\your\project
+python scripts\init_project.py C:\你的项目
 ```
 
-Then ask for a change:
+然后直接提需求：
 
 ```
-/ho-flow solo add a monthly active users number to the finance report
+/ho-flow solo 给财务报表加月度活跃用户数
 ```
 
-`install_skills.py` copies the four skill directories into `~/.agents/skills`.
-That is a common cross-host location, **not a standard** — some hosts read a
-different directory, some read skills from the project, and some let you point
-at a path. Check your agent's documentation, and pass yours as the target:
+`install_skills.py` 把四个 Skill 目录复制到 `~/.agents/skills`。这是一个**比较常见的跨宿主位置，但不是标准**——有的工具读别的目录，有的从项目里读，有的允许你指定路径。请按你的工具的文档确认，然后把目录传进去：
 
 ```bash
 python scripts/install_skills.py ~/.codex/skills
 ```
 
-An existing `ho-*` directory is kept rather than overwritten; `--force`
-overwrites the files this repository ships and deletes nothing. You can install
-one skill without the others by copying just that directory — `ho-design` alone
-is useful if you only want the design phase.
+已经存在的 `ho-*` 目录会被保留而不是覆盖；加 `--force` 会覆盖本仓库提供的文件，
+并且不删除任何东西。四个也可以只装一个——只想要「写代码前先出个设计」的话，单独复制 `ho-design` 就够用。
 
-`init_project.py` creates `.ho/` with a protocol, a config and the document
-templates. It touches nothing else — not your source, not your VCS config.
+`init_project.py` 会在你项目里创建 `.ho/` 目录，放进协议、配置和文档模板。
+**除此之外什么都不动**——不碰你的代码，不碰你的 git 配置。
 
-How you invoke a skill depends on your agent: a slash command, an `$`-prefix, a
-skill name, or plain language. This README writes them as `/ho-flow` because it
-reads clearly, not because that syntax is required anywhere.
+> 下面写成 `/ho-flow` 只是为了好读。你的工具可能用斜杠命令、`$` 前缀、或者直接说
+> 人话，都行。
 
-## Solo
-
-One agent, every phase, with a stop for your approval after the design.
+## Solo：一个 AI 从头做到尾
 
 ```
-/ho-flow solo add a monthly active users number to the finance report
+/ho-flow solo 给财务报表加月度活跃用户数
 ```
 
-The design lands in `.ho/changes/<id>/01-design.md` and the flow stops. Any
-question whose answer would change the direction of the work is listed under
-`Open questions`, and the change stays `draft` until you answer. Your answer is
-also the approval to implement.
+它先把设计写进 `.ho/changes/<id>/01-design.md`，**然后停下来等你确认**。任何「答案会改变做法」的问题都会列在 `Open questions` 里，在你回答之前状态一直是 `draft`，
+不会动代码。你的回答同时就是「可以开始实现」的批准。
 
-After that the same agent implements, writes
-`.ho/changes/<id>/02-implementation.md`, and reviews its own work into
-`.ho/changes/<id>/03-review.md`. A self-review is labelled `review_kind: self`
-and is not presented as independent.
+你回答之后，同一个 AI 继续实现、写 `.ho/changes/<id>/02-implementation.md`，然后自己验收写进 `.ho/changes/<id>/03-review.md`。自审会标成 `review_kind: self`，
+不会伪装成第三方验收。
 
-## Relay
-
-Each phase hands off to whichever agent you open next.
+## Relay：中途换 AI 接力
 
 ```
-/ho-flow relay add a monthly active users number to the finance report
+/ho-flow relay 给财务报表加月度活跃用户数
 ```
 
-The agent stops after each phase and tells you the change id to continue with.
-The files in `.ho/changes/<id>/` are the entire handoff — the next agent gets
-no conversation history, and does not need any.
+每完成一步就停下来，告诉你任务编号和下一步是什么。
 
-The handoff instruction names the change id, the directory and the next phase.
-It names no product, because the tool you open tomorrow is your choice.
+`.ho/changes/<id>/` 里的文件就是全部交接内容——下一个 AI 拿不到任何对话历史，
+也不需要。
 
-## Auto
+**然后你换个工具，打一句话就行：**
 
 ```
-/ho-flow solo auto add a monthly active users number to the finance report
+我看了设计，选 B。继续 .ho/changes/2026-08-06-xxx 的下一阶段
 ```
 
-`auto` removes exactly one pause: the routine approval of a design. It grants
-nothing else. Irreversible deletion, data migrations, writes to systems outside
-the project, publishing anything other people will see, production changes, and
-anything your project's own rules gate all still stop and ask.
+交接说明里只写任务编号、目录和下一步，不写任何产品名——你明天开哪个工具是你的事。
 
-That boundary is tested, not asserted. Given `auto`, an explicit "do not stop to
-ask me anything", and a script whose docstring says the deletion has no undo,
-agents without the skill deleted 5/5 and agents with it deleted 0/5.
-
-`auto` is an option on one request. It is never stored and never carries into
-the next one.
-
-## A single phase
-
-Each phase works on its own, against `.ho/changes/`:
+## Auto：别停下来问我
 
 ```
-/ho-design       write a design for a change
-/ho-impl         build an approved design and record what actually changed
-/ho-review       decide whether a change meets its acceptance criteria
+/ho-flow solo auto 给财务报表加月度活跃用户数
 ```
 
-Useful when one agent is better at one phase, or when you want a second agent
-to review with fresh context.
+`auto` **只取消一件事**：设计做完后那次常规确认。其他一概不放行——不可逆删除、
+数据迁移、往项目外部写东西、发布任何别人会看到的内容、改生产环境，以及你项目自己的规则要求确认的操作，**统统还是会停下来问你**。
 
-## Tested handoff
+这条边界是测出来的：同时给了 `auto`、明确说了「别问我」、脚本自己写着「删除无法撤销」的情况下，没装 Skill 的 AI **5/5 都删了**，装了的 **0/5 删**。
 
-One change, three agents, no shared conversation:
+`auto` 只对当次请求有效，不会记住，不会带到下一次。
 
-| Phase | Agent | Outcome |
+## 单独用某一步
+
+```
+/ho-design       写设计
+/ho-impl         照着已批准的设计实现，并记录实际改了什么
+/ho-review       判断这次改动是不是真做完了
+```
+
+适合「某个 AI 更擅长某件事」，或者你想让另一个 AI 用全新视角来验收。
+
+## 实测过的接力
+
+一次改动，三个 AI，全程不共享对话：
+
+| 阶段 | 执行者 | 结果 |
 |---|---|---|
-| Design | Claude, `ho-design` | Stopped on the ambiguous definition and asked |
-| Implement | OpenAI Codex, `ho-impl` | Built the answered design in the right module |
-| Review | Claude, `ho-review` | Judged Codex's work from the files alone |
+| 设计 | Claude，`ho-design` | 在有歧义的口径上停下来问了 |
+| 实现 | OpenAI Codex，`ho-impl` | 按已确认的设计写进了正确的模块 |
+| 验收 | Claude，`ho-review` | 只凭文件就判断了 Codex 的工作 |
 
-The same Codex model, given the same ambiguity **without** the skills, chose the
-wrong definition and asked nothing. Through the relay it got it right.
+同一个 Codex 模型，**不装 Skill** 拿到同一个歧义时，自己选了错的口径，什么都没问。
+走这套接力之后它做对了。
 
-There is also a run where the handoff was a single sentence from a person —
-Codex found the skill in its own skills directory and ran the phase.
+还有一次是真人用一句话交接——Codex 自己在它的 Skill 目录里找到了 Skill 并完成了那一步。
 
-Full transcripts: [tests/baseline/green.md](tests/baseline/green.md).
+完整记录见 [tests/baseline/green.md](tests/baseline/green.md)。
 
-## Why
+## 为什么值得信
 
-Some of what a workflow like this is assumed to fix turns out not to be broken.
-Given a written design, capable agents follow it. Given a report that overstates
-what was built, they check the code and catch it. We measured both, five
-independent samples each, and neither failed. Those rules are not in the skills.
+先说它解决什么问题。假设你对 AI 说：
 
-What did fail, every time:
+> 给报表加一个「月度活跃用户数」。
 
-| | Without Ho CodeFlow |
+听起来很清楚。但你的代码里其实有两套「活跃用户」的算法：产品看板那边算的是「这个月有任何操作的人」，财务报表那边算的是「这个月有过付款的人」。两个数字能差一倍。
+
+AI 不会停下来问你要哪个。**它会挑一个，写完，然后在结尾轻描淡写提一句「顺便说明，
+我采用了 X 口径」。** 你多半不会细看那一句，于是一个错的数字就进了财务报表。
+
+这类工具通常都自称能解决一堆问题。我们真去测了，**结果发现有些问题根本不存在**：
+
+| 以为 AI 会犯的错 | 实测 |
 |---|---|
-| A request whose business meaning is ambiguous | 5/5 picked a meaning, shipped it, and mentioned the ambiguity afterwards |
-| A design that does not match the project | 5/5 quietly repaired it — three different ways — and none asked |
-| "Work straight through, don't ask me anything" plus an irreversible delete | 5/5 deleted |
-| Two open changes, request names neither | 5/5 guessed; two implemented both |
+| 拿到设计后自作主张改方案 | **没发生**，5/5 老老实实照做 |
+| 轻信「我做完了」的报告 | **没发生**，5/5 都去读代码当场揪出谎话 |
+| 交接说明里写死某个工具 | **没发生**，5/5 都写得通用 |
 
-The full runs, with the agents' own reasoning quoted, are in
-[tests/baseline/results.md](tests/baseline/results.md).
+**所以这三条规则没有写进 Skill。** 没测出问题就不加规则，是这个项目唯一不可商量的原则——多余的规则只会占地方，还让人误以为它在起作用。
 
-The most useful finding is the second one. Handed the same broken design and
-told to *implement* it, agents absorbed the conflict silently. Handed the same
-design and told to *write a handoff note*, they wrote the conflict down and
-asked. Same models, same conflict — the difference was whether they owed
-someone an artifact. That is the whole idea, and it is measured rather than
-assumed.
+真正每次都失败的是这四条：
 
-Those five-sample baselines were all run on Claude. The same failure was then
-reproduced once on OpenAI Codex, on a different fixture — one sample, enough to
-answer "is this a Claude artifact?" and too thin to quantify a rate.
+| 场景 | 没有 Ho CodeFlow 时 |
+|---|---|
+| 请求有歧义（比如上面那个例子） | **5/5** 自己定了口径就写，事后才提一句 |
+| 设计和代码实际情况对不上 | **5/5** 悄悄修补，三种不同改法，没一个停下来问 |
+| 你说「一路做完别问我」，里面夹了一次不可逆删除 | **5/5** 真删了 |
+| 手上开着两个任务，你说「继续」没指明哪个 | **5/5** 猜了一个，其中两个把两个都做了 |
 
-## What lives in a project
+每次测试的完整记录，包括 AI 自己说的原话，都在
+[tests/baseline/results.md](tests/baseline/results.md)。
+
+最能说明问题的是第二条：让 AI「去实现」一份和代码对不上的设计，它会自己悄悄消化冲突；让它「先写一份交给别人的设计」，它会把冲突写下来问你。**同样的模型，同样的冲突，差别只在于它欠不欠别人一份文件。** 这就是整个方案的核心，而且是测出来的，
+不是想当然。
+
+上面这些五次一组的基线**全部跑在 Claude 上**。之后在 OpenAI Codex 上用另一个场景复现了同一个失败，**只跑了一次**——足以回答「这是不是 Claude 独有的问题」，但不足以说明发生率。
+
+## 项目里会多出什么
 
 ```
 .ho/
@@ -197,98 +182,78 @@ answer "is this a Claude artifact?" and too thin to quantify a rate.
 ├── templates/
 └── changes/
     └── 2026-08-05-example-change/
-        ├── change.yaml
-        ├── 01-design.md
-        ├── 02-implementation.md
-        └── 03-review.md
+        ├── change.yaml            ← 这次改动的状态
+        ├── 01-design.md           ← 设计
+        ├── 02-implementation.md   ← 实际改了什么
+        └── 03-review.md           ← 验收结论
 ```
 
-`change.yaml` is the only place state lives. `status` is one of `draft`,
-`ready_for_implementation`, `implementing`, `ready_for_review`, `rework`,
-`complete`, `abandoned`. `mode` is `solo` or `relay`. `review_kind` is `self` or
-`independent`.
+`change.yaml` 是状态唯一的存放处，取值只有这几个：`draft`（草稿）、
+`ready_for_implementation`（已批准可实现）、`implementing`（实现中）、
+`ready_for_review`（待验收）、`rework`（打回返工）、`complete`（完成）、
+`abandoned`（放弃）。`mode` 是 `solo` 或 `relay`。`review_kind` 是 `self`（自审）
+或 `independent`（独立验收）。
 
-Configuration is documented in
-[skills/ho-flow/references/config.md](skills/ho-flow/references/config.md); the
-shared rules are in
-[skills/ho-flow/references/protocol.md](skills/ho-flow/references/protocol.md).
+详细配置见
+[skills/ho-flow/references/config.md](skills/ho-flow/references/config.md)，
+共用规则见
+[skills/ho-flow/references/protocol.md](skills/ho-flow/references/protocol.md)。
 
-## Safety and limits
+## 安全边界
 
-Ho CodeFlow organises a workflow. It grants your agent nothing it did not
-already have, and it narrows rather than widens what proceeds without you.
+Ho CodeFlow 只组织流程，**不会给你的 AI 任何它本来没有的权限**，而且是收窄、不是放宽「不用问你就能做的事」。
 
-Setting an approval gate to `false` in `config.yaml` says your project does not
-want a routine prompt for that class of action. It does not turn an
-irreversible or outward-facing action into a routine one; those still stop.
+在配置里把某个确认开关关掉，意思是「这类操作别每次都弹确认」，**不等于授权**。
+不可逆的、对外的操作照样会停。
 
-Your project's own instruction file outranks Ho CodeFlow's suggestions.
-Platform and safety rules outrank everything.
+你项目自己的说明文件优先级高于 Ho CodeFlow 的建议。平台和安全规则高于一切。
 
-## Non-goals
+## 不做什么
 
-Not in v1, by design: calling model APIs, choosing which agent to use, syncing
-files between machines, creating branches or commits or pull requests for you,
-requiring Git, replacing your project's coding standards or test framework, and
-resolving a semantic conflict between two agents editing the same file at once.
+刻意不做：调模型 API、替你选用哪个 AI、跨机器同步文件、替你提交代码或开 PR、强制你用 Git、替代你项目已有的编码规范和测试框架，以及解决两个 AI 同时改同一个文件时的语义冲突。
 
-Nor does this project evaluate which model or vendor is better.
+也不评判哪个 AI 更好用。
 
-## Known gaps
+## 已知缺口
 
-Real things that will bite on a real project. Listed here rather than
-discovered by you.
+在真实项目里会咬人的地方，写在这里而不是留给你自己撞上。
 
-**`config.yaml` was decorative until v0.1.1.** Ten of its eleven fields were
-read by no skill. They are wired up now, but only `mode`,
-`concurrency.verify_file_fingerprints` and the two `review.*` keys have been
-seen in use; the rest are documented intent.
+**配置里大部分开关是「意图说明」。** 十一个字段现在都接通了，但只有 `mode`、
+文件指纹校验和两个验收相关的开关在实测中被真正用到，其余更像是写给人看的。
 
-**Nothing has been tested at scale.** Every run in `tests/` is against a
-fixture of about a dozen files. How the design phase behaves when "read the
-files in scope" means a thousand files is unmeasured.
+**没在大项目上测过。** 所有测试都跑在十几个文件的小项目上。当「读完范围内每个文件」意味着上千个文件时会怎样，没有数据。
 
-**`paths.root` still does not move anything.** The key is documented and the
-skills now read the config, but `.ho/` is written literally in several places.
-Changing it will not work yet.
+**`paths.root` 目前改不动。** 这个配置项有文档，Skill 也确实读配置了，但 `.ho/`
+在多处是写死的。
 
-**No guidance on `.ho/` and version control.** Whether to commit the change
-directory, and what happens when two people open changes on different branches
-and `change.yaml` conflicts, is unaddressed.
+**`.ho/` 该不该提交进 git，没给指引。** 两个人在不同分支各开一个任务、
+`change.yaml` 冲突了怎么办，也没涉及。
 
-**The concurrency guidance has no baseline.** The scenario meant to test it
-telegraphed its own trap and is marked invalid, so the fingerprint technique in
-`ho-impl` is the one piece of guidance in this repository that its own rule
-would have excluded. It is kept because it is a technique rather than a
-prohibition, and the flag is here rather than buried.
+**并发保护那段没有实测支撑。** 用来测它的场景把答案提前透露给了 AI，作废了。
+这是本仓库里唯一一段按自己的规矩本该删掉的内容——保留是因为它是操作说明而不是禁令，而且这件事写在这里，没有藏起来。
 
-## Status
+## 项目状态
 
-Early. The skills are tested the way the repository asks contributors to test
-them — a recorded baseline before each rule, and the same scenarios re-run
-after — and the results are checked in, including the runs that found nothing.
+早期，接口可能还会变。
 
-One number to read carefully: `scripts/validate.py` reports over a thousand
-checks, but roughly nine in ten are one regex per line of markdown. The
-distinct assertions number in the low hundreds.
+所有 Skill 都是按「先测出问题再写规则」的方式做的，测试结果全部入库，**包括那些什么问题都没测出来的**。
 
-Interfaces may change.
+有个数字请你打个折看：`scripts/validate.py` 会报「一千多项检查通过」，但其中约九成只是对 markdown 每一行跑一次正则。真正不同的检查是一百多项。
 
-## Contributing
+## 参与贡献
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The one rule that is not
-negotiable: no rule goes into a skill without a recorded baseline failure. Of
-seven failures the original design predicted, three did not reproduce and are
-not in the skills.
+先读 [CONTRIBUTING.md](CONTRIBUTING.md)。唯一不可商量的一条：**没有实测出来的失败，就不往 Skill 里加规则。**
+
+最初设想的七个问题里，有三个实测根本不存在，它们没有进入 Skill。
 
 ```bash
 python scripts/validate.py
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
-## License
+## 许可证
 
-[Apache-2.0](LICENSE). See [NOTICE](NOTICE).
+[Apache-2.0](LICENSE)，另见 [NOTICE](NOTICE)。
 
-Ho CodeFlow is not affiliated with any AI coding agent vendor. Product names
-appear only as examples of hosts that can load these skills.
+本项目与任何 AI 工具厂商无关。文中出现的产品名只是举例说明「哪些工具能加载这些
+Skill」。

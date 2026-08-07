@@ -43,6 +43,9 @@ MODES = ("solo", "relay")
 REVIEW_KINDS = ("self", "independent")
 ARTIFACTS = ("change.yaml", "01-design.md", "02-implementation.md", "03-review.md")
 
+# Vendor names in a skill body would make the handoff instructions wrong for
+# whoever the reader actually opens tomorrow. READMEs may name products as
+# installation examples; skills and templates may not.
 VENDOR = re.compile(
     r"\b(claude|codex|cursor|copilot|gemini|aider|windsurf|chatgpt|openai|anthropic)\b"
     r"|CLAUDE\.md|\.cursorrules",
@@ -56,6 +59,13 @@ FRONTMATTER_KEYS = ("name", "description")
 
 
 class Report:
+    """Collects failures instead of raising on the first one.
+
+    A contributor fixing drift wants the whole list in one run, not one error
+    per invocation. `checks` counts every assertion attempted — see the note in
+    the README about how to read that number.
+    """
+
     def __init__(self):
         self.errors = []
         self.checks = 0
@@ -88,7 +98,13 @@ def rel(path):
 
 
 def parse_frontmatter(text):
-    """Return (dict, body) or (None, text) when there is no frontmatter."""
+    """Return (dict, body) or (None, text) when there is no frontmatter.
+
+    A deliberately small YAML subset — flat `key: value` pairs plus indented
+    continuation lines — because this repository ships no dependencies and the
+    frontmatter spec allows nothing more than that anyway. Anything it cannot
+    parse is reported as malformed rather than guessed at.
+    """
     if not text.startswith("---\n"):
         return None, text
     end = text.find("\n---\n", 4)
@@ -143,6 +159,8 @@ def check_skills(report):
                      % (skill, len(raw_header)))
 
         description = data.get("description", "")
+        # "Use when" keeps descriptions to triggering conditions. A description
+        # that summarises the workflow gets followed *instead of* the skill body.
         report.check(description.startswith("Use when"),
                      "skills/%s/SKILL.md: description must start with 'Use when'" % skill)
         report.check(len(description) <= 500,
@@ -155,7 +173,9 @@ def check_skills(report):
         report.check(os.path.isfile(agents),
                      "missing skills/%s/agents/openai.yaml" % skill)
 
-        # Skill directories hold runtime files only.
+        # Skill directories hold runtime files only. Anything a human reads —
+        # installation, changelog — belongs in the repository root, so that a
+        # skill copied into an agent's skills directory carries no dead weight.
         for stray in ("README.md", "CHANGELOG.md", "INSTALL.md"):
             report.check(not os.path.exists(os.path.join(sdir, stray)),
                          "skills/%s/%s: skill directories hold runtime files only"
@@ -185,7 +205,13 @@ def check_vendor_neutrality(report):
 
 
 def check_vocabulary(report):
-    """Every status/mode/review_kind value written anywhere must be a legal one."""
+    """Every status/mode/review_kind value written anywhere must be a legal one.
+
+    Invented values are the failure mode this catches: agents coined `blocked`
+    and `reviewed` in testing, and a status one agent writes and the next does
+    not recognise breaks the handoff silently. `tests/` is excluded because its
+    fixtures deliberately contain wrong values.
+    """
     pattern = re.compile(r"^\s*[-*|>` ]*(status|mode|review_kind):\s*`?([a-z_][a-z_]*)`?",
                          re.MULTILINE)
     legal = {"status": STATUSES, "mode": MODES, "review_kind": REVIEW_KINDS}
@@ -204,6 +230,12 @@ def check_vocabulary(report):
 
 
 def check_readmes(report):
+    """The two READMEs must mention the same vocabulary, or neither.
+
+    Prose is not compared — translations should read naturally. What cannot
+    drift is which statuses, modes, artifacts and skills exist, because a
+    reader of one README should not learn a different product from the other.
+    """
     en = os.path.join(REPO, "README.md")
     zh = os.path.join(REPO, "README.zh-CN.md")
     if not report.check(os.path.isfile(en), "missing README.md"):
@@ -241,6 +273,8 @@ def check_templates(report):
 
 
 def check_fences(report):
+    # An unbalanced fence swallows the rest of the file when rendered, which
+    # hides content rather than announcing itself.
     for path in markdown_files():
         count = 0
         for line in read(path).split("\n"):
@@ -262,7 +296,9 @@ def check_links(report):
             clean = target.split("#", 1)[0]
             if not clean:
                 continue
-            if "<" in clean or ">" in clean:  # placeholder such as <id>
+            if "<" in clean or ">" in clean:
+                # A documentation placeholder such as `.ho/changes/<id>/`, not
+                # a path that is supposed to exist.
                 continue
             resolved = os.path.normpath(os.path.join(base, clean))
             report.check(os.path.exists(resolved),

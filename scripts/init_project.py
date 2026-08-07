@@ -34,6 +34,12 @@ DOC_TEMPLATES = ("design.md", "implementation.md", "review.md")
 
 
 class Result:
+    """What the run did to each path, so the report can be honest about it.
+
+    Three lists rather than a count: a user who runs this twice needs to see
+    that the second run kept their edits, not just that it "succeeded".
+    """
+
     def __init__(self):
         self.created = []
         self.kept = []
@@ -41,11 +47,17 @@ class Result:
 
 
 def _template_dir(language):
+    # English templates sit at the top of templates/; every translation gets a
+    # subdirectory named after its language tag.
     return TEMPLATES if language == "en" else os.path.join(TEMPLATES, language)
 
 
 def _copy(src, dest, force, result):
-    """Copy `src` to `dest`, leaving an existing file alone unless forced."""
+    """Copy `src` to `dest`, leaving an existing file alone unless forced.
+
+    Silently overwriting is the one thing this script must never do: `.ho/` is
+    inside someone's project and its config is meant to be edited.
+    """
     if os.path.exists(dest):
         if not force:
             result.kept.append(dest)
@@ -66,6 +78,8 @@ def init(project_dir, language="en", mode="solo", force=False):
     tdir = _template_dir(language)
     result = Result()
 
+    # config.yaml is the one file that is not a straight copy — the requested
+    # --mode has to be written into it. Everything else goes through _copy().
     config_src = os.path.join(TEMPLATES, "config.yaml")
     config_dest = os.path.join(ho, "config.yaml")
     if os.path.exists(config_dest) and not force:
@@ -80,6 +94,9 @@ def init(project_dir, language="en", mode="solo", force=False):
             fh.write(text)
         (result.replaced if existed else result.created).append(config_dest)
 
+    # The project gets its own copy of the protocol rather than a pointer at
+    # this repository: agents read `.ho/protocol.md` at runtime, and the project
+    # keeps working after this checkout is gone.
     protocol_src = PROTOCOL_EN if language == "en" else PROTOCOL_ZH
     _copy(protocol_src, os.path.join(ho, "protocol.md"), force, result)
 
@@ -89,7 +106,9 @@ def init(project_dir, language="en", mode="solo", force=False):
     _copy(os.path.join(TEMPLATES, "change.yaml"),
           os.path.join(ho, "templates", "change.yaml"), force, result)
 
-    # Handoff data, never a template. Created empty, never overwritten.
+    # Handoff data, never a template. Created empty and never overwritten, not
+    # even under --force: the directory holds work in progress, and a re-init
+    # that wiped it would destroy the record the whole workflow exists to keep.
     changes = os.path.join(ho, "changes")
     if not os.path.isdir(changes):
         os.makedirs(changes)
@@ -103,6 +122,8 @@ def _report(result, project_dir):
         try:
             return os.path.relpath(p, project_dir)
         except ValueError:
+            # Windows: relpath raises when the two paths are on different
+            # drives. Fall back to the absolute path rather than crash.
             return p
 
     for path in result.created:
@@ -128,6 +149,9 @@ def main(argv=None):
                         help="default mode written into config.yaml")
     parser.add_argument("--force", action="store_true",
                         help="replace existing files under .ho/, except changes/")
+    # argparse rejects an unknown --mode or --language for us, which is why
+    # nothing downstream re-validates them. Note `auto` is deliberately absent:
+    # it is a per-request option, not a mode.
     args = parser.parse_args(argv)
 
     result = init(args.project_dir, args.language, args.mode, args.force)

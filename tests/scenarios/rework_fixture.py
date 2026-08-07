@@ -8,6 +8,9 @@ The round-1 report carries ROUND-1-MARKER-* strings so a test can detect
 mechanically whether its content survived round 2.
 """
 
+# Everything below is test input. The ROUND-1-MARKER-* tokens in IMPL_R1 exist
+# so a test can prove mechanically whether round 1's text survived round 2 —
+# do not remove them, and do not reword the surrounding prose.
 CHANGE_YAML = """version: 1
 id: 2026-01-18-monthly-active-users
 slug: monthly-active-users
